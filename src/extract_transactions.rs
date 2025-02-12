@@ -37,26 +37,8 @@ pub async fn extract_current_transactions(
         let chunk = load_chunk(archive_path, each_chunk_manifest).await?;
 
         for (i, tx) in chunk.txns.iter().enumerate() {
-            // TODO: unsure if this is off by one
-            // perhaps reverse the vectors before transforming
-
-            // first increment the block metadata. This assumes the vector is sequential.
+            // first collect the block metadata. This assumes the vector is sequential.
             if let Some(block) = tx.try_as_block_metadata() {
-                // // check the epochs are incrementing or not
-                // if epoch > block.epoch()
-                //     && round > block.round()
-                //     && timestamp > block.timestamp_usecs()
-                // {
-                //     dbg!(
-                //         epoch,
-                //         block.epoch(),
-                //         round,
-                //         block.round(),
-                //         timestamp,
-                //         block.timestamp_usecs()
-                //     );
-                // }
-
                 epoch = block.epoch();
                 round = block.round();
                 timestamp = block.timestamp_usecs();
@@ -66,6 +48,12 @@ pub async fn extract_current_transactions(
                 .txn_infos
                 .get(i)
                 .expect("could not index on tx_info chunk, vectors may not be same length");
+
+            // only process successful transactions
+            if !tx_info.status().is_success() {
+                continue;
+            };
+
             let tx_hash_info = tx_info.transaction_hash();
 
             let tx_events = chunk

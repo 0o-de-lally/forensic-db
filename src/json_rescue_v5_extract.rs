@@ -32,8 +32,11 @@ pub fn extract_v5_json_rescue(
 ) -> Result<(Vec<WarehouseTxMaster>, Vec<WarehouseEvent>, Vec<String>)> {
     let json = std::fs::read_to_string(one_json_file).context("could not read file")?;
 
-    let txs: Vec<TransactionViewV5> = serde_json::from_str(&json)
+    let mut txs: Vec<TransactionViewV5> = serde_json::from_str(&json)
         .map_err(|e| anyhow!("could not parse JSON to TransactionViewV5, {:?}", e))?;
+
+    // remove any aborted txs
+    txs.retain(|t| t.vm_status.is_executed());
 
     decode_transaction_dataview_v5(&txs)
 }
