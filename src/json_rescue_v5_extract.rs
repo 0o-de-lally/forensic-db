@@ -21,7 +21,7 @@ use libra_backwards_compatibility::{
 use anyhow::{anyhow, Context, Result};
 use diem_temppath::TempPath;
 use diem_types::account_address::AccountAddress;
-use log::trace;
+use log::{info, trace};
 use std::path::{Path, PathBuf};
 
 /// The canonical transaction archives for V5 were kept in a different format as in v6 and v7.
@@ -36,7 +36,12 @@ pub fn extract_v5_json_rescue(
         .map_err(|e| anyhow!("could not parse JSON to TransactionViewV5, {:?}", e))?;
 
     // remove any aborted txs
+    let orig_len = txs.len();
     txs.retain(|t| t.vm_status.is_executed());
+    let new_len = txs.len();
+    if orig_len > new_len {
+        info!("Excluding {} unsuccessful transactions", orig_len - new_len);
+    };
 
     decode_transaction_dataview_v5(&txs)
 }

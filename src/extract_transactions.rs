@@ -33,6 +33,8 @@ pub async fn extract_current_transactions(
     let mut user_txs: Vec<WarehouseTxMaster> = vec![];
     let mut events: Vec<WarehouseEvent> = vec![];
 
+    let mut count_excluded = 0;
+
     for each_chunk_manifest in manifest.chunks {
         let chunk = load_chunk(archive_path, each_chunk_manifest).await?;
 
@@ -51,6 +53,7 @@ pub async fn extract_current_transactions(
 
             // only process successful transactions
             if !tx_info.status().is_success() {
+                count_excluded += 1;
                 continue;
             };
 
@@ -91,6 +94,8 @@ pub async fn extract_current_transactions(
             warn!("some transactions excluded from extraction");
         }
     }
+
+    info!("Excluding {} unsuccessful transactions", count_excluded);
 
     Ok((user_txs, events))
 }
