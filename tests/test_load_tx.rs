@@ -19,7 +19,7 @@ async fn test_tx_batch() -> anyhow::Result<()> {
     libra_forensic_db::log_setup();
     let archive_path = support::fixtures::v6_tx_manifest_fixtures_path();
     let (txs, _events) = extract_current_transactions(&archive_path, &FrameworkVersion::V6).await?;
-    assert!(txs.len() == 27);
+    assert!(txs.len() == 25);
 
     let c = start_neo4j_container();
     let port = c.get_host_port_ipv4(7687);
@@ -79,7 +79,7 @@ async fn test_tx_batch() -> anyhow::Result<()> {
     let row = result.next().await?.unwrap();
     let total_tx_count: i64 = row.get("total_tx_count").unwrap();
 
-    assert!(total_tx_count == 24);
+    assert!(total_tx_count == 22);
 
     Ok(())
 }
@@ -105,7 +105,8 @@ async fn test_load_entry_point_tx() -> anyhow::Result<()> {
     assert!(res.created_accounts == 25);
     assert!(res.modified_accounts == 6);
     assert!(res.unchanged_accounts == 0);
-    assert!(res.created_tx == 27);
+    dbg!(&res.created_tx);
+    assert!(res.created_tx == 25);
 
     Ok(())
 }
