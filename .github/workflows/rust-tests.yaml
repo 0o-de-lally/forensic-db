@@ -9,9 +9,8 @@ on:
     types:
       - opened
       - synchronize
-    branches:
-      - "release**"
-      - "main**"
+      - reopened
+    branches: ["**"]
   schedule:
     - cron: "30 00 * * *"
 
