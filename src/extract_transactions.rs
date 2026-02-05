@@ -12,6 +12,7 @@ use libra_types::move_resource::coin_register_event::CoinRegisterEvent;
 use log::{error, info, warn};
 use serde_json::json;
 use std::path::Path;
+use std::sync::Arc;
 
 /// Extracts all transactions and events from a given archive path.
 ///
@@ -172,17 +173,17 @@ pub fn decode_events(
 
             if let Ok(e) = WithdrawEvent::try_from_bytes(el.event_data()) {
                 data = json!(&e);
-                event = UserEventTypes::Withdraw(e);
+                event = UserEventTypes::Withdraw(Arc::new(e));
             }
 
             if let Ok(e) = DepositEvent::try_from_bytes(el.event_data()) {
                 data = json!(&e);
-                event = UserEventTypes::Deposit(e);
+                event = UserEventTypes::Deposit(Arc::new(e));
             }
 
             if let Ok(e) = CoinRegisterEvent::try_from_bytes(el.event_data()) {
                 data = json!(&e);
-                event = UserEventTypes::Onboard(e);
+                event = UserEventTypes::Onboard(Arc::new(e));
             }
 
             Some(WarehouseEvent {

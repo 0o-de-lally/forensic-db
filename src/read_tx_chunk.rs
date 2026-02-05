@@ -38,7 +38,7 @@ pub struct TransactionArchiveChunk {
 }
 
 /// Loads a specific transaction chunk from an archive path based on its manifest.
-pub async fn load_chunk(
+pub async fn load_chunk(archive_path: &Path, manifest: TransactionChunk) -> Result<TransactionArchiveChunk> {
     let full_handle = archive_path
         .parent()
         .expect("could not read archive path")
