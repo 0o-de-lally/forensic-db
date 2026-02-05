@@ -16,6 +16,7 @@ chrono = { version = "0.4.19", features = ["clock", "serde"] }
 clap = { version = "4.3.5", features = ["derive", "unstable-styles"] }
 diem-temppath = { git = "https://github.com/0LNetworkCommunity/diem.git", branch = "release" }
 diem-types = { git = "https://github.com/0LNetworkCommunity/diem.git", branch = "release" }
+diem-backup-cli = { git = "https://github.com/0LNetworkCommunity/diem.git", branch = "release" }
 diem-crypto = { git = "https://github.com/0LNetworkCommunity/diem.git", branch = "release" }
 env_logger = "^0.11"
 flate2 = "^1.0"

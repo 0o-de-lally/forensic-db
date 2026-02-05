@@ -7,7 +7,7 @@ use diem_crypto::HashValue;
 use diem_types::account_config::{NewBlockEvent, WithdrawEvent};
 use diem_types::contract_event::ContractEvent;
 use diem_types::{account_config::DepositEvent, transaction::SignedTransaction};
-use libra_storage::read_tx_chunk::{load_chunk, load_tx_chunk_manifest};
+use crate::read_tx_chunk::{load_chunk, load_tx_chunk_manifest};
 use libra_types::move_resource::coin_register_event::CoinRegisterEvent;
 use log::{error, info, warn};
 use serde_json::json;

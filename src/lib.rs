@@ -15,6 +15,7 @@ pub mod load_exchange_orders;
 pub mod load_tx_cypher;
 pub mod neo4j_init;
 pub mod queue;
+pub mod read_tx_chunk;
 pub mod scan;
 pub mod schema_account_state;
 pub mod schema_exchange_orders;
