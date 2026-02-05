@@ -13,6 +13,7 @@ use libra_backwards_compatibility::sdk::{
 };
 use libra_types::{exports::AccountAddress, move_resource::coin_register_event::CoinRegisterEvent};
 use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 
 /// High-level categorization of transaction relationships.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -72,7 +73,7 @@ impl RelationLabel {
 }
 
 /// Metadata for a blockchain event.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct WarehouseEvent {
     pub tx_hash: HashValue,
     pub event: UserEventTypes,
@@ -81,11 +82,11 @@ pub struct WarehouseEvent {
 }
 
 /// Supported user event types.
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum UserEventTypes {
-    Withdraw(WithdrawEvent),
-    Deposit(DepositEvent),
-    Onboard(CoinRegisterEvent),
+    Withdraw(Arc<WithdrawEvent>),
+    Deposit(Arc<DepositEvent>),
+    Onboard(Arc<CoinRegisterEvent>),
     Other,
 }
 
@@ -115,43 +116,6 @@ pub struct WarehouseTxMaster {
     pub entry_function: Option<EntryFunctionArgs>,
     pub events: Vec<WarehouseEvent>,
     pub framework_version: FrameworkVersion,
-    // TODO framework version
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-
-pub enum UserEventTypes {
-    Withdraw(WithdrawEvent),
-    Deposit(DepositEvent),
-    Onboard(CoinRegisterEvent),
-    Other,
-}
-
-#[derive(Debug, Deserialize, Clone, Serialize)]
-pub enum EntryFunctionArgs {
-    // TODO:
-    // Current(CurrentVersionEntryFunctionCall),
-    V7(V7EntryFunctionCall),
-    V6(V6EntryFunctionCall),
-    V5(ScriptFunctionCallGenesis),
-    V520(ScriptFunctionCallV520),
-}
-
-#[derive(Debug, Deserialize, Serialize)]
-pub struct WarehouseTxMaster {
-    pub tx_hash: HashValue,
-    pub relation_label: RelationLabel,
-    pub sender: AccountAddress,
-    pub function: String,
-    pub epoch: u64,
-    pub round: u64,
-    pub block_timestamp: u64,
-    pub block_datetime: DateTime<Utc>,
-    pub expiration_timestamp: u64,
-    pub entry_function: Option<EntryFunctionArgs>,
-    pub events: Vec<WarehouseEvent>,
-    pub framework_version: FrameworkVersion,
-    // TODO framework version
 }
 
 impl Default for WarehouseTxMaster {
