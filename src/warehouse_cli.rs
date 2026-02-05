@@ -294,9 +294,18 @@ pub async fn try_db_connection_pool(cli: &WarehouseCli) -> Result<Graph> {
     let db = match get_credentials_from_env() {
         Ok((uri, user, password)) => Graph::new(uri, user, password).await?,
         Err(_) => {
-            let uri = cli.db_uri.as_ref().expect("Must pass --db-uri or set URI_ENV");
-            let user = cli.db_username.as_ref().expect("Must pass --db-user or set USER_ENV");
-            let password = cli.db_password.as_ref().expect("Must pass --db-password or set PASS_ENV");
+            let uri = cli
+                .db_uri
+                .as_ref()
+                .expect("Must pass --db-uri or set URI_ENV");
+            let user = cli
+                .db_username
+                .as_ref()
+                .expect("Must pass --db-user or set USER_ENV");
+            let password = cli
+                .db_password
+                .as_ref()
+                .expect("Must pass --db-password or set PASS_ENV");
             Graph::new(uri, user, password).await?
         }
     };
