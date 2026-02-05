@@ -14,7 +14,7 @@ Implement a new CLI subcommand to run a persistent Neo4j instance using Docker. 
 
 - **Completed**: Implemented `LocalDockerDb` subcommand.
 - **Completed**: Documentation updated (Usage + Architecture/Tradeoffs).
-- **Verified**: Fully tested and verified.
+- **Refined**: Updated architecture docs to focus on technical challenges (JMT, proprietary formats) rather than analogies.
 
 ## Next Steps
 
