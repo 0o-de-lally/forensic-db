@@ -31,7 +31,7 @@ You are operating under the **Nightshift Protocol** - a methodology that transfo
 
 ```
 .nightshift/
-├── AGENTS.md              # This file - core protocol (you're reading it)
+├── agents.md              # This file - core protocol (you're reading it)
 ├── agents/                # Persona templates
 │   ├── engineer.md        # Primary autonomous engineer persona
 │   ├── planner.md         # Strategic planning persona

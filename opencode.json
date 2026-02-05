@@ -1,64 +1,67 @@
 {
-  "$schema": "https://opencode.ai/config.json",
-  "instructions": [".nightshift/AGENTS.md"],
-  "agent": {
-    "engineer-nightshift": {
-      "description": "Autonomous Nightshift Engineer - follows the Nightshift Protocol",
-      "mode": "primary",
-      "prompt": "{file:.nightshift/agents/engineer.md}",
-      "tools": {
-        "write": true,
-        "edit": true,
-        "bash": true
-      }
+    "$schema": "https://opencode.ai/config.json",
+
+    "instructions": [".nightshift/agents.md"],
+
+    "agent": {
+        "engineer-nightshift": {
+            "description": "Autonomous Nightshift Engineer - follows the Nightshift Protocol",
+            "mode": "primary",
+            "prompt": "{file:.nightshift/agents/engineer.md}",
+            "tools": {
+                "write": true,
+                "edit": true,
+                "bash": true
+            }
+        },
+        "planner-nightshift": {
+            "description": "Strategic Nightshift Planner - breaks down complex tasks",
+            "mode": "subagent",
+            "prompt": "{file:.nightshift/agents/planner.md}",
+            "tools": {
+                "write": false,
+                "edit": false,
+                "bash": false
+            }
+        }
     },
-    "planner-nightshift": {
-      "description": "Strategic Nightshift Planner - breaks down complex tasks",
-      "mode": "subagent",
-      "prompt": "{file:.nightshift/agents/planner.md}",
-      "tools": {
-        "write": false,
-        "edit": false,
-        "bash": false
-      }
+
+    "command": {
+        "start-session-nightshift": {
+            "description": "Initialize a Nightshift session",
+            "template": "Start session:\n\n1. Read .nightshift/state/forward-prompt.md\n2. Read .nightshift/state/nag-status.json\n3. Summarize prior context\n4. Ask what task to work on"
+        },
+        "document-work-nightshift": {
+            "description": "Document current work progress",
+            "template": "Document current work:\n\n1. Read .nightshift/state/forward-prompt.md for context\n2. List completed tasks since last session\n3. Document current state of work\n4. Note any blockers or issues\n5. Update .nightshift/state/forward-prompt.md with new progress"
+        },
+        "git-brain-commit-nightshift": {
+            "description": "Create a commit with Git-Brain metadata",
+            "template": "Create a Git-Brain commit:\n\n1. Run `git diff --staged` to see staged changes\n2. Create a commit message with:\n   - Header: conventional commit type\n   - Body: summary of changes\n   - Footer: GIT_BRAIN_METADATA JSON block\n3. Reference .nightshift/commands/git-brain-commit.md"
+        },
+        "update-nag-status-nightshift": {
+            "description": "Run quality checks and update nag status",
+            "template": "Update nag status:\n\n1. Read .nightshift/nags/ for definitions\n2. Run build, test, and lint\n3. Update .nightshift/state/nag-status.json\n4. Report pass/fail for each nag"
+        },
+        "nag-check-nightshift": {
+            "description": "Run all nag checks",
+            "template": "Run all nag checks:\n\n1. Read .nightshift/nags/ for protocols\n2. Run build, test, and lint\n3. Update .nightshift/state/nag-status.json\n4. Report status for each nag"
+        },
+        "forward-prompt-nightshift": {
+            "description": "Update forward prompt",
+            "template": "Update .nightshift/state/forward-prompt.md:\n\n1. Set session ID and timestamps\n2. Describe current objective\n3. List accomplishments\n4. Prioritize next steps\n5. Note blockers\n6. Add context for next agent"
+        },
+        "docs-index-nightshift": {
+            "description": "Deep initialize/regenerate knowledge base index",
+            "template": "Run docs-index protocol:\n\n1. Read .nightshift/commands/docs-index.md\n2. Crawl project from README.md or docs/project-index.md\n3. Check every directory has README.md\n4. Verify bi-directional links (parent-child)\n5. Audit code interfaces (JSDoc/Docstrings)\n6. Fix dead links\n7. Maintain indices in docs/"
+        },
+        "docs-cleanup-nightshift": {
+            "description": "Clean and compact documentation, deprecate old docs",
+            "template": "Run docs-cleanup protocol:\n\n1. Read .nightshift/commands/docs-cleanup.md\n2. Scan docs/ directory for stale files\n3. Check Git history for freshness and frequency\n4. Rate file relevance (High/Low/Reference)\n5. Rename obsolete files to .deprecated.md\n6. Add deprecation banners\n7. Fix broken links\n8. Update docs/project-index.md"
+        },
+        "new-module-nightshift": {
+            "description": "Start new module development",
+            "template": "Start new module: $ARGUMENTS\n\n1. Read .nightshift/commands/new-module-development.md\n2. Create plan in docs/plan/${ARGUMENTS}-plan.md\n3. Begin Plan -> Stub -> Implement workflow"
+        }
     }
-  },
-  "command": {
-    "start-session-nightshift": {
-      "description": "Initialize a Nightshift session",
-      "template": "Start session:\n\n1. Read .nightshift/state/forward-prompt.md\n2. Read .nightshift/state/nag-status.json\n3. Summarize prior context\n4. Ask what task to work on"
-    },
-    "document-work-nightshift": {
-      "description": "Document current work progress",
-      "template": "Document current work:\n\n1. Read .nightshift/state/forward-prompt.md for context\n2. List completed tasks since last session\n3. Document current state of work\n4. Note any blockers or issues\n5. Update .nightshift/state/forward-prompt.md with new progress"
-    },
-    "git-brain-commit-nightshift": {
-      "description": "Create a commit with Git-Brain metadata",
-      "template": "Create a Git-Brain commit:\n\n1. Run `git diff --staged` to see staged changes\n2. Create a commit message with:\n   - Header: conventional commit type\n   - Body: summary of changes\n   - Footer: GIT_BRAIN_METADATA JSON block\n3. Reference .nightshift/commands/git-brain-commit.md"
-    },
-    "update-nag-status-nightshift": {
-      "description": "Run quality checks and update nag status",
-      "template": "Update nag status:\n\n1. Read .nightshift/nags/ for definitions\n2. Run build, test, and lint\n3. Update .nightshift/state/nag-status.json\n4. Report pass/fail for each nag"
-    },
-    "nag-check-nightshift": {
-      "description": "Run all nag checks",
-      "template": "Run all nag checks:\n\n1. Read .nightshift/nags/ for protocols\n2. Run build, test, and lint\n3. Update .nightshift/state/nag-status.json\n4. Report status for each nag"
-    },
-    "forward-prompt-nightshift": {
-      "description": "Update forward prompt",
-      "template": "Update .nightshift/state/forward-prompt.md:\n\n1. Set session ID and timestamps\n2. Describe current objective\n3. List accomplishments\n4. Prioritize next steps\n5. Note blockers\n6. Add context for next agent"
-    },
-    "docs-index-nightshift": {
-      "description": "Deep initialize/regenerate knowledge base index",
-      "template": "Run docs-index protocol:\n\n1. Read .nightshift/commands/docs-index.md\n2. Crawl project from README.md or docs/project-index.md\n3. Check every directory has README.md\n4. Verify bi-directional links (parent-child)\n5. Audit code interfaces (JSDoc/Docstrings)\n6. Fix dead links\n7. Maintain indices in docs/"
-    },
-    "docs-cleanup-nightshift": {
-      "description": "Clean and compact documentation, deprecate old docs",
-      "template": "Run docs-cleanup protocol:\n\n1. Read .nightshift/commands/docs-cleanup.md\n2. Scan docs/ directory for stale files\n3. Check Git history for freshness and frequency\n4. Rate file relevance (High/Low/Reference)\n5. Rename obsolete files to .deprecated.md\n6. Add deprecation banners\n7. Fix broken links\n8. Update docs/project-index.md"
-    },
-    "new-module-nightshift": {
-      "description": "Start new module development",
-      "template": "Start new module: $ARGUMENTS\n\n1. Read .nightshift/commands/new-module-development.md\n2. Create plan in docs/plan/${ARGUMENTS}-plan.md\n3. Begin Plan -> Stub -> Implement workflow"
-    }
-  }
 }

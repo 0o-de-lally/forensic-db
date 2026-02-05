@@ -20,7 +20,7 @@ You need to generate three specific pieces of information:
     - _Do_ write a prompt that would reproduce this result if run _now_, knowing what you know.
     - _MUST_ reference specific existing .md files (templates, nags, methods) that explain the behavior.
     - _CRITICAL_: Ensure referenced .md files exist in the _parent_ commit (before this change).
-    - _Example_: "Refactor the authentication logic using `templates/agents/security-engineer.md` and verify with `templates/nags/security-nag.md`."
+    - _Example_: "Refactor the authentication logic using `templates/agents/engineer.md` and verify with `templates/nags/javascript-nag.md`."
 
 - **Expected Outcome (The Goal)**:
     - Describe the functional state after this commit.
@@ -46,7 +46,7 @@ The footer must be a valid JSON object wrapped in an HTML comment.
 <!--
 GIT_BRAIN_METADATA:
 {
-  "retroactive_prompt": "Update user schema using templates/agents/database-architect.md",
+  "retroactive_prompt": "Update user schema using templates/agents/engineer.md",
   "expectedOutcome": "<FUNCTIONAL_GOAL>",
   "contextSummary": "<ARCHITECTURAL_CONTEXT>",
   "diffHints": ["<HINT_1>", "<HINT_2>"],

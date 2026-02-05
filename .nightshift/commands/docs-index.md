@@ -19,7 +19,7 @@ All documentation must strictly adhere to the project's formatting and location 
 ### Core Requirements:
 1.  **Root-to-Leaf Connectivity**: Every file must be reachable via links starting from the root `README.md`.
 2.  **Bi-Directional Navigation**: Every `README.md` must link "Up" to its parent and "Down" to its children or canonical docs in `./docs/`.
-3.  **Code-Adjacent Documentation**: Docstrings/Rustdoc must be used in source files for implementation details.
+3.  **Code-Adjacent Documentation**: Docstrings/JSDoc must be used in source files for implementation details.
 
 ## Steps
 
@@ -36,7 +36,7 @@ Start at the project root `README.md` and perform a depth-first traversal:
 
 Walk through modified source files:
 
-- **Public API Audit**: Ensure exported functions, structs, and traits have Rustdoc (`///`) comments focusing on intent.
+- **Public API Audit**: Ensure exported functions, structs, and traits have appropriate doc-comments focusing on intent.
 - **In-line Logic**: Explain the *Why* for complex blocks.
 
 ### 3. Link & Naming Verification
@@ -49,7 +49,7 @@ Walk through modified source files:
 
 Maintain the following indices in `./docs/`:
 - `project-index.md`: High-level map of the entire project.
-- `source-index.md`: Granular map of the `src/` directory.
+- `source-index.md`: Granular map of the source code (e.g., `src/`).
 
 ## Checklist
 

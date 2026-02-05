@@ -1,9 +1,5 @@
 {
-    "sessionId": "ns-20260205-01",
-    "nags": {
-        "commit-discipline-nag": "OK",
-        "forward-prompt-nag": "OK",
-        "rust-nag": "OK"
-    },
-    "lastUpdated": "2026-02-05T10:15:00Z"
+    "sessionId": "",
+    "nags": {},
+    "lastUpdated": ""
 }
