@@ -1,35 +1,36 @@
 # Forward Prompt
 
-This file maintains context between agent sessions. Update it regularly.
-
 ## Current Session
 
-**Session ID**: (not started)
-**Started**: (not started)
-**Last Updated**: (not started)
+**Session ID**: session-001
+**Started**: Thu Feb 05 2026
+**Last Updated**: Thu Feb 05 2026
 
 ## Objective
 
-(Describe the high-level goal you're working toward)
+Implement a new CLI subcommand to run a persistent Neo4j instance using Docker. This avoids local Neo4j installation while ensuring data persistence across container restarts.
 
 ## Current Status
 
-(What has been accomplished so far)
+- **Completed**: Implemented `StartDb` subcommand in `src/warehouse_cli.rs`.
+- **Completed**: Added `neo4j_data/` to `.gitignore`.
+- **Verified**:
+    - Started DB using `cargo run -- start-db`.
+    - Ingested test fixtures for v5, v6, and v7.
+    - **Persistence Verified**: Restarted the container and confirmed data availability (155 nodes persisted).
 
 ## Next Steps
 
-1. (Most important next task)
-2. (Second priority)
-3. (Third priority)
+- (Optional) Document usage in README.md.
+- (Optional) Add CI/CD integration for Docker tests.
 
 ## Blockers
 
-(Any issues preventing progress - leave empty if none)
+None.
 
 ## Context Notes
 
-(Important context for the next agent picking up this work)
-
----
-
-_Update this file after completing significant steps, before commits, and every 10-15 minutes of active work._
+- **Command**: `cargo run -- start-db`
+- **Docker Image**: `neo4j:5.12.0` (default)
+- **Data Directory**: `./neo4j_data` (default, gitignored)
+- **Authentication**: Uses default `neo4j/neo4j` (or whatever is set via CLI/Env). *Note*: Tests used password `password`.
