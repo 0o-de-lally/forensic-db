@@ -24,9 +24,9 @@ use diem_types::account_address::AccountAddress;
 use log::{info, trace};
 use std::path::{Path, PathBuf};
 
-/// The canonical transaction archives for V5 were kept in a different format as in v6 and v7.
-/// As of Nov 2024, there's a project to recover the V5 transaction archives to be in the same bytecode flat file format as v6 and v7.
-/// Until then, we must parse the json files.
+/// Extracts transactions and events from a V5 JSON "rescue" file.
+///
+/// V5 transaction archives are often stored in JSON format for historical recovery.
 pub fn extract_v5_json_rescue(
     one_json_file: &Path,
 ) -> Result<(Vec<WarehouseTxMaster>, Vec<WarehouseEvent>, Vec<String>)> {
@@ -46,6 +46,7 @@ pub fn extract_v5_json_rescue(
     decode_transaction_dataview_v5(&txs)
 }
 
+/// Decodes a slice of `TransactionViewV5` into warehouse records.
 pub fn decode_transaction_dataview_v5(
     txs: &[TransactionViewV5],
 ) -> Result<(Vec<WarehouseTxMaster>, Vec<WarehouseEvent>, Vec<String>)> {
@@ -95,6 +96,7 @@ pub fn decode_transaction_dataview_v5(
     Ok((tx_vec, event_vec, unique_functions))
 }
 
+/// Decodes V5 transaction bytes into a `WarehouseTxMaster` structure.
 pub fn decode_entry_function_v5(wtx: &mut WarehouseTxMaster, tx_bytes: &[u8]) -> Result<()> {
     // test we can bcs decode to the transaction object
     let t: TransactionV5 = bcs::from_bytes(tx_bytes).map_err(|err| {
@@ -250,10 +252,9 @@ fn maybe_decode_v520_function(
     }
     Ok(())
 }
-/// from a tgz file unwrap to temp path
-/// NOTE: we return the Temppath object for the directory
-/// for the enclosing function to handle
-/// since it will delete all the files once it goes out of scope.
+/// Decompresses a `.tgz` file into a temporary directory.
+///
+/// Returns a `TempPath` object which will delete the temporary directory when dropped.
 pub fn decompress_to_temppath(tgz_file: &Path) -> Result<TempPath> {
     let temp_dir = TempPath::new();
     temp_dir.create_as_dir()?;
@@ -263,7 +264,7 @@ pub fn decompress_to_temppath(tgz_file: &Path) -> Result<TempPath> {
     Ok(temp_dir)
 }
 
-/// gets all json files decompressed from tgz
+/// Lists all `.json` files within a directory and its subdirectories.
 pub fn list_all_json_files(search_dir: &Path) -> Result<Vec<PathBuf>> {
     let path = search_dir.canonicalize()?;
 
@@ -276,7 +277,7 @@ pub fn list_all_json_files(search_dir: &Path) -> Result<Vec<PathBuf>> {
     Ok(vec_pathbuf)
 }
 
-/// gets all json files decompressed from tgz
+/// Lists all `.tgz` files within a directory and its subdirectories.
 pub fn list_all_tgz_archives(search_dir: &Path) -> Result<Vec<PathBuf>> {
     let path = search_dir.canonicalize()?;
 

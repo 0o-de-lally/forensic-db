@@ -18,6 +18,7 @@ pub fn parse_date(date_str: &str) -> DateTime<Utc> {
         .with_timezone(&Utc)
 }
 
+/// Deserializer helper to parse an account address from a hex string (with or without '0x').
 pub fn de_address_from_any_string<'de, D>(
     deserializer: D,
 ) -> Result<Option<AccountAddress>, D::Error>

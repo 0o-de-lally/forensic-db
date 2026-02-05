@@ -9,7 +9,9 @@ use crate::{
     schema_transaction::WarehouseTxMaster,
 };
 
-// TODO: code duplication with exchange order loading.
+/// Batches and loads transactions into the database.
+///
+/// Ensures accounts are created/merged before linking them with transaction relationships.
 pub async fn tx_batch(
     txs: &[WarehouseTxMaster],
     pool: &Graph,
@@ -72,6 +74,9 @@ pub async fn tx_batch(
     Ok(all_results)
 }
 
+/// Executes a batch insertion of transactions into Neo4j.
+///
+/// First ensures all involved accounts exist, then creates the transaction relationships.
 pub async fn impl_batch_tx_insert(
     pool: &Graph,
     batch_txs: &[WarehouseTxMaster],

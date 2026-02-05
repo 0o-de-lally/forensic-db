@@ -14,21 +14,23 @@ use std::{
     fmt,
     path::{Path, PathBuf},
 };
+
+/// A map of directory paths to their corresponding manifest information.
 #[derive(Clone, Debug)]
 pub struct ArchiveMap(pub BTreeMap<PathBuf, ManifestInfo>);
 
+/// Metadata about a Libra blockchain archive discovered during scanning.
 #[derive(Clone, Debug)]
-
 pub struct ManifestInfo {
-    /// the enclosing directory of the local .manifest file
+    /// The enclosing directory of the local .manifest file.
     pub archive_dir: PathBuf,
-    /// the name of the directory, as a unique archive identifier
+    /// The name of the directory, as a unique archive identifier.
     pub archive_id: String,
-    /// what libra version were these files encoded with (v5 etc)
+    /// The Libra version used to encode these files (e.g., v5).
     pub version: FrameworkVersion,
-    /// contents of the manifest
+    /// The type of content described by the manifest.
     pub contents: BundleContent,
-    /// processed
+    /// Whether this archive has already been processed.
     pub processed: bool,
 }
 
@@ -97,6 +99,8 @@ impl ManifestInfo {
         FrameworkVersion::Unknown
     }
 }
+
+/// Supported versions of the Libra blockchain framework.
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
 pub enum FrameworkVersion {
     #[default]
@@ -112,6 +116,7 @@ impl fmt::Display for FrameworkVersion {
     }
 }
 
+/// Types of data bundles found in archives.
 #[derive(Clone, Debug, clap::ValueEnum, PartialEq)]
 pub enum BundleContent {
     Unknown,
@@ -143,8 +148,9 @@ impl BundleContent {
     }
 }
 
-/// Crawl a directory and find all .manifest files.
-/// Optionally find
+/// Recursively crawls a directory to find all `.manifest` files and build an `ArchiveMap`.
+///
+/// Optionally filters by a specific `BundleContent` type.
 pub fn scan_dir_archive(
     parent_dir: &Path,
     content_opt: Option<BundleContent>,

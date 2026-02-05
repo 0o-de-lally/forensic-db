@@ -5,7 +5,9 @@ use anyhow::{Context, Result};
 use log::{error, info, warn};
 use neo4rs::Graph;
 
-// TODO: code duplication
+/// Batches and loads account states from a snapshot into the database.
+///
+/// Uses the queue system to ensure resume capability.
 pub async fn snapshot_batch(
     txs: &[WarehouseAccState],
     pool: &Graph,
@@ -61,6 +63,7 @@ pub async fn snapshot_batch(
     Ok(all_results)
 }
 
+/// Executes a batch insertion of account states into Neo4j.
 pub async fn impl_batch_snapshot_insert(
     pool: &Graph,
     batch_snapshots: &[WarehouseAccState],

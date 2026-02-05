@@ -1,0 +1,34 @@
+#!/bin/bash
+#
+# Pre-push hook to check documentation rules
+#
+
+# Check if bun is installed, otherwise use node
+if command -v bun &> /dev/null; then
+  EXEC="bun"
+elif command -v node &> /dev/null; then
+  EXEC="node"
+else
+  echo "Error: Neither bun nor node found. Cannot run check-docs.js"
+  exit 1
+fi
+
+SCRIPT_PATH=".nightshift/scripts/check-docs.js"
+
+if [ ! -f "$SCRIPT_PATH" ]; then
+    echo "Warning: $SCRIPT_PATH not found. Skipping documentation check."
+    exit 0
+fi
+
+# Run the script
+$EXEC "$SCRIPT_PATH"
+
+# Capture the exit code
+RESULT=$?
+
+if [ $RESULT -ne 0 ]; then
+  echo "Push aborted due to documentation rule violations."
+  exit 1
+fi
+
+exit 0

@@ -14,7 +14,10 @@ fn calculate_rms(data: &[f64]) -> f64 {
     }
 }
 
-/// enrich swap struct with RMS data
+/// Enriches a slice of exchange orders with Root Mean Square (RMS) price statistics.
+///
+/// Calculates RMS prices over 1-hour and 24-hour windows, excluding the current
+/// order's participants to avoid self-influence.
 pub fn include_rms_stats(swaps: &mut [ExchangeOrder]) {
     swaps.sort_by_key(|swap| swap.filled_at);
 
@@ -109,6 +112,10 @@ fn get_competing_offers(
 
     competition
 }
+/// Identifies potential "shill" behavior in exchange transactions.
+///
+/// Flags transactions where an accepter rationally should have taken a better
+/// price available in the order book but chose not to.
 pub fn process_shill(all_transactions: &mut [ExchangeOrder]) {
     all_transactions.sort_by_key(|el| el.filled_at); // Sort by filled_at
 

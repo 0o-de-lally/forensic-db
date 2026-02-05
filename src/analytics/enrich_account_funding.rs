@@ -14,6 +14,7 @@ use crate::schema_exchange_orders::{ExchangeOrder, OrderType};
 #[cfg(test)]
 use crate::util::parse_date;
 
+/// Aggregated balance and flow data for an exchange account.
 #[derive(Default, Debug, Clone, Deserialize, Serialize)]
 pub struct AccountDataAlt {
     pub current_balance: f64,
@@ -25,9 +26,11 @@ pub struct AccountDataAlt {
     pub daily_outflows: f64,
 }
 
+/// A ledger of account data indexed by time.
 #[derive(Default, Debug, Deserialize, Serialize)]
 pub struct UserLedger(pub BTreeMap<DateTime<Utc>, AccountDataAlt>);
 
+/// Tracks ledgers for multiple users.
 #[derive(Default, Debug, Deserialize, Serialize)]
 pub struct BalanceTracker(pub BTreeMap<u32, UserLedger>); // Tracks data for each user
 

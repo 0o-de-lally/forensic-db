@@ -11,7 +11,7 @@ use diem_types::transaction::TransactionInfo;
 use diem_types::write_set::WriteSet;
 use libra_backwards_compatibility::version_five::state_snapshot_v5::open_for_read;
 
-/// read snapshot manifest file into object
+/// Reads a transaction backup manifest file into a `TransactionBackup` object.
 pub fn load_tx_chunk_manifest(path: &Path) -> anyhow::Result<TransactionBackup> {
     let s =
         std::fs::read_to_string(path).context(format!("Error: cannot read file at {:?}", path))?;
@@ -25,6 +25,10 @@ pub fn load_tx_chunk_manifest(path: &Path) -> anyhow::Result<TransactionBackup> 
 // diem/storage/backup/backup-cli/src/backup_types/transaction/restore.rs
 // The vectors below are OF THE SAME LENGTH
 // It is a table where for example, a tx without events will be an empty slot in the vector.
+/// A chunk of transaction data extracted from an archive.
+///
+/// Contains the manifest, transactions, transaction info, events, and write sets.
+/// All vectors are of the same length, representing a tabular structure.
 pub struct TransactionArchiveChunk {
     pub manifest: TransactionChunk,
     pub txns: Vec<Transaction>,
@@ -33,10 +37,8 @@ pub struct TransactionArchiveChunk {
     pub write_sets: Vec<WriteSet>,
 }
 
+/// Loads a specific transaction chunk from an archive path based on its manifest.
 pub async fn load_chunk(
-    archive_path: &Path,
-    manifest: TransactionChunk,
-) -> Result<TransactionArchiveChunk> {
     let full_handle = archive_path
         .parent()
         .expect("could not read archive path")

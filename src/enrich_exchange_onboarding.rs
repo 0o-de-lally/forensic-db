@@ -17,6 +17,9 @@ use std::path::Path;
 //   ...
 // ]
 
+/// Metadata for exchange on-ramp mapping.
+///
+/// Maps an on-chain address to an exchange user ID.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ExchangeOnRamp {
     #[serde(deserialize_with = "de_address_from_any_string")]
@@ -25,28 +28,14 @@ pub struct ExchangeOnRamp {
     user_id: u64,
 }
 
-// fn from_any_string<'de, D>(deserializer: D) -> Result<Option<AccountAddress>, D::Error>
-// where
-//     D: Deserializer<'de>,
-// {
-//     let s: &str = Deserialize::deserialize(deserializer)?;
-//     // do better hex decoding than this
-//     let mut lower = s.to_ascii_lowercase();
-//     if !lower.contains("0x") {
-//         lower = format!("0x{}", lower);
-//     }
-
-//     Ok(AccountAddress::from_hex_literal(&lower).ok())
-// }
-
-/// get exchnge Onramp file
-// TODO: boilerplate copy of enrich_whitepages
 impl ExchangeOnRamp {
+    /// Parses a JSON file containing exchange on-ramp mappings.
     pub fn parse_json_file(path: &Path) -> Result<Vec<Self>> {
         let s = std::fs::read_to_string(path)?;
         Ok(serde_json::from_str(&s)?)
     }
 
+    /// Converts the struct into a Cypher-compatible object string.
     pub fn to_cypher_object_template(&self) -> String {
         format!(
             r#"{{user_id: {}, address: "{}" }}"#,
@@ -55,7 +44,7 @@ impl ExchangeOnRamp {
         )
     }
 
-    /// create a cypher query string for the map object
+    /// Creates a Cypher map string from a list of `ExchangeOnRamp` objects.
     pub fn to_cypher_map(list: &[Self]) -> String {
         let mut list_literal = "".to_owned();
         for el in list {
@@ -71,6 +60,7 @@ impl ExchangeOnRamp {
         format!("[{}]", list_literal)
     }
 
+    /// Generates a Cypher query to batch link addresses to swap accounts.
     pub fn cypher_batch_link_owner(list_str: &str) -> String {
         format!(
             r#"
@@ -89,6 +79,7 @@ impl ExchangeOnRamp {
     }
 }
 
+/// Batches and inserts exchange on-ramp data into the Neo4j database.
 pub async fn impl_batch_tx_insert(pool: &Graph, batch_txs: &[ExchangeOnRamp]) -> Result<u64> {
     let mut unique_owners = vec![];
     batch_txs.iter().for_each(|t| {

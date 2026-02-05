@@ -1,3 +1,8 @@
+//! # Libra Forensic DB
+//!
+//! An ETL system for processing Libra blockchain archives into a graph database (Neo4j).
+//! This library provides the core logic for scanning, extracting, and loading blockchain data.
+
 pub mod analytics;
 pub mod batch_tx_type;
 pub mod cypher_templates;

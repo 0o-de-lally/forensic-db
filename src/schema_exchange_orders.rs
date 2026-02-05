@@ -5,6 +5,7 @@ use chrono::{DateTime, Utc};
 
 use serde::{Deserialize, Deserializer, Serialize};
 
+/// The type of an exchange order (Buy or Sell).
 #[derive(Clone, Debug, Default, Deserialize, Serialize, PartialEq)]
 pub enum OrderType {
     Buy,
@@ -21,6 +22,7 @@ impl fmt::Display for OrderType {
     }
 }
 
+/// A record of an off-chain exchange order.
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[allow(dead_code)]
 pub struct ExchangeOrder {
@@ -49,6 +51,8 @@ pub struct ExchangeOrder {
     #[serde(skip_deserializing)]
     pub competing_offers: Option<CompetingOffers>, // New field to indicate if it took the best price
 }
+
+/// Statistics about competing offers for an exchange order.
 #[derive(Clone, Debug, Default, Deserialize, Serialize)]
 pub struct CompetingOffers {
     pub offer_type: OrderType,
@@ -79,8 +83,7 @@ impl Default for ExchangeOrder {
 }
 
 impl ExchangeOrder {
-    /// creates one transaction record in the cypher query map format
-    /// Note original data was in an RFC rfc3339 with Z for UTC, Cypher seems to prefer with offsets +00000
+    /// Converts the exchange order into a Cypher-compatible object string.
     pub fn to_cypher_object_template(&self) -> String {
         format!(
             r#"{{user: {}, accepter: {}, order_type: "{}", amount: {}, price:{}, created_at: datetime("{}"), created_at_ts: {}, filled_at: datetime("{}"), filled_at_ts: {}, accepter_shill_down: {}, accepter_shill_up: {}, rms_hour: {}, rms_24hour: {}, price_vs_rms_hour: {}, price_vs_rms_24hour: {} }}"#,
@@ -102,7 +105,7 @@ impl ExchangeOrder {
         )
     }
 
-    /// create a cypher query string for the map object
+    /// Converts a slice of exchange orders into a Cypher map string.
     pub fn to_cypher_map(list: &[Self]) -> String {
         let mut list_literal = "".to_owned();
         for el in list {
@@ -114,6 +117,7 @@ impl ExchangeOrder {
         format!("[{}]", list_literal)
     }
 
+    /// Generates a Cypher query for batch inserting exchange orders.
     pub fn cypher_batch_insert_str(list_str: String) -> String {
         format!(
             r#"
@@ -157,6 +161,7 @@ where
     s.parse::<f64>().map_err(serde::de::Error::custom)
 }
 
+/// Deserializes a JSON string into a vector of `ExchangeOrder` objects.
 pub fn deserialize_orders(json_data: &str) -> Result<Vec<ExchangeOrder>> {
     let orders: Vec<ExchangeOrder> = serde_json::from_str(json_data)?;
     Ok(orders)

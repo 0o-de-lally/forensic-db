@@ -14,6 +14,7 @@ use libra_backwards_compatibility::sdk::{
 use libra_types::{exports::AccountAddress, move_resource::coin_register_event::CoinRegisterEvent};
 use serde::{Deserialize, Serialize};
 
+/// High-level categorization of transaction relationships.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum RelationLabel {
     Unknown, // undefined tx
@@ -70,12 +71,51 @@ impl RelationLabel {
     }
 }
 
+/// Metadata for a blockchain event.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct WarehouseEvent {
     pub tx_hash: HashValue,
     pub event: UserEventTypes,
     pub event_name: String,
     pub data: serde_json::Value,
+}
+
+/// Supported user event types.
+#[derive(Debug, Serialize, Deserialize)]
+pub enum UserEventTypes {
+    Withdraw(WithdrawEvent),
+    Deposit(DepositEvent),
+    Onboard(CoinRegisterEvent),
+    Other,
+}
+
+/// Arguments for different versions of entry functions.
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub enum EntryFunctionArgs {
+    // TODO:
+    // Current(CurrentVersionEntryFunctionCall),
+    V7(V7EntryFunctionCall),
+    V6(V6EntryFunctionCall),
+    V5(ScriptFunctionCallGenesis),
+    V520(ScriptFunctionCallV520),
+}
+
+/// The master warehouse record for a blockchain transaction.
+#[derive(Debug, Deserialize, Clone, Serialize)]
+pub struct WarehouseTxMaster {
+    pub tx_hash: HashValue,
+    pub relation_label: RelationLabel,
+    pub sender: AccountAddress,
+    pub function: String,
+    pub epoch: u64,
+    pub round: u64,
+    pub block_timestamp: u64,
+    pub block_datetime: DateTime<Utc>,
+    pub expiration_timestamp: u64,
+    pub entry_function: Option<EntryFunctionArgs>,
+    pub events: Vec<WarehouseEvent>,
+    pub framework_version: FrameworkVersion,
+    // TODO framework version
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -134,11 +174,7 @@ impl Default for WarehouseTxMaster {
 }
 
 impl WarehouseTxMaster {
-    /// since no sane Cypher serialization libraries exist.
-    /// and I'm not going to write a deserializer.
-    /// and JSON is not the same format as cypher property maps
-    /// I'd use JSON5 but the last time someone updated
-    /// that crate was 3 years ago.
+    /// Converts the transaction into a Cypher-compatible object string.
     pub fn to_cypher_object_template(&self) -> String {
         // make blank string or nest the arguments
         let mut tx_args = "NULL".to_string();
@@ -169,7 +205,7 @@ impl WarehouseTxMaster {
         )
     }
 
-    /// make a string from the warehouse object
+    /// Converts a slice of transactions into a Cypher map string.
     pub fn to_cypher_map(txs: &[Self]) -> String {
         let mut list_literal = "".to_owned();
         for el in txs {

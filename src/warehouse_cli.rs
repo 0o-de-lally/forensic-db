@@ -17,10 +17,12 @@ use crate::{
     unzip_temp, util,
 };
 
+/// CLI for the Libra Forensic Database.
+///
+/// Supports various subcommands for ingesting archives, enriching data, and running analytics.
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
 #[clap(arg_required_else_help(true))]
-/// Extract, transform, and load data into a graph datawarehouse
 pub struct WarehouseCli {
     #[clap(long, short('r'))]
     /// URI of graphDB e.g. neo4j+s://localhost:port
@@ -140,6 +142,7 @@ pub enum AnalyticsSub {
 }
 
 impl WarehouseCli {
+    /// Runs the CLI application based on the parsed subcommand.
     pub async fn run(&self) -> anyhow::Result<()> {
         match &self.command {
             Sub::IngestAll {
@@ -290,6 +293,7 @@ impl WarehouseCli {
     }
 }
 
+/// Attempts to establish a connection pool to Neo4j using credentials from env or CLI args.
 pub async fn try_db_connection_pool(cli: &WarehouseCli) -> Result<Graph> {
     let db = match get_credentials_from_env() {
         Ok((uri, user, password)) => Graph::new(uri, user, password).await?,

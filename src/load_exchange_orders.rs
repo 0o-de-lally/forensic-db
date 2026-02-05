@@ -10,6 +10,7 @@ use crate::{
     schema_exchange_orders::ExchangeOrder,
 };
 
+/// Batches and loads exchange orders into the database.
 pub async fn exchange_txs_batch(
     txs: &[ExchangeOrder],
     pool: &Graph,
@@ -66,6 +67,7 @@ pub async fn exchange_txs_batch(
     Ok((merged_count, ignored_count))
 }
 
+/// Executes a batch insertion of exchange orders into Neo4j.
 pub async fn impl_batch_tx_insert(pool: &Graph, batch_txs: &[ExchangeOrder]) -> Result<(u64, u64)> {
     let list_str = ExchangeOrder::to_cypher_map(batch_txs);
     let cypher_string = ExchangeOrder::cypher_batch_insert_str(list_str);
@@ -84,6 +86,7 @@ pub async fn impl_batch_tx_insert(pool: &Graph, batch_txs: &[ExchangeOrder]) -> 
     Ok((merged as u64, ignored as u64))
 }
 
+/// Loads exchange orders from a JSON file, enriches them, and inserts them into the database.
 pub async fn load_from_json(path: &Path, pool: &Graph, batch_size: usize) -> Result<(u64, u64)> {
     let mut orders = extract_exchange_orders::read_orders_from_file(path)?;
     info!("completed parsing orders");

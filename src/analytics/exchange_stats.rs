@@ -6,6 +6,7 @@ use neo4rs::Graph;
 use serde::{Deserialize, Serialize};
 use tokio::sync::Semaphore;
 
+/// Results of an RMS (Root Mean Square) price analysis.
 #[derive(Debug, Serialize, Deserialize)]
 pub struct RMSResults {
     pub id: String,
@@ -16,6 +17,7 @@ pub struct RMSResults {
 
 static DEFAULT_BATCH_SIZE: u64 = 100;
 
+/// Concurrently queries Neo4j for RMS price analytics across all trades.
 pub async fn query_rms_analytics_concurrent(
     pool: &Graph,
     threads: Option<usize>,
@@ -61,7 +63,7 @@ pub async fn query_rms_analytics_concurrent(
     Ok(rms_vec)
 }
 
-// get rms analytics on transaction
+/// Queries a chunk of trades for RMS analytics.
 pub async fn query_rms_analytics_chunk(
     pool: &Graph,
     skip_to: u64,
@@ -118,7 +120,7 @@ RETURN DISTINCT(elementId(txs)) AS id, txs.filled_at AS time, matching_trades, r
     Ok(results)
 }
 
-// get rms analytics on transaction
+/// Queries the total number of swap transactions in the database.
 pub async fn query_trades_count(pool: &Graph) -> Result<u64> {
     let cypher_string = r#"
 MATCH (:SwapAccount)-[t:Swap]->(:SwapAccount)

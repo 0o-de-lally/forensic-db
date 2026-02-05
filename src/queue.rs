@@ -4,6 +4,7 @@ use neo4rs::Graph;
 
 use crate::scan::ArchiveMap;
 
+/// Updates or creates a task in the Neo4j queue.
 pub async fn update_task(
     pool: &Graph,
     archive_id: &str,
@@ -31,6 +32,7 @@ pub async fn update_task(
     Ok(task_id)
 }
 
+/// Retrieves all archive IDs that have incomplete tasks in the queue.
 pub async fn get_queued(pool: &Graph) -> Result<Vec<String>> {
     let cypher_string = r#"
       MATCH (a:Queue)
@@ -57,7 +59,10 @@ pub async fn get_queued(pool: &Graph) -> Result<Vec<String>> {
     Ok(archive_ids)
 }
 
-// Three options: Not found in DB, found and complete, found and incomplete
+/// Checks if a specific batch of an archive is marked as complete.
+///
+/// Returns `Ok(Some(true))` if complete, `Ok(Some(false))` if incomplete,
+/// and `Err` if the task is not found.
 pub async fn is_batch_complete(
     pool: &Graph,
     archive_id: &str,
@@ -86,7 +91,7 @@ pub async fn is_batch_complete(
     }
 }
 
-// Three options: Not found in DB, found and complete, found and incomplete
+/// Checks if all batches for a given archive ID are completed.
 pub async fn are_all_completed(pool: &Graph, archive_id: &str) -> Result<bool> {
     let cypher_string = format!(
         r#"
@@ -115,7 +120,7 @@ pub async fn are_all_completed(pool: &Graph, archive_id: &str) -> Result<bool> {
     }
 }
 
-// clear queue
+/// Removes all tasks from the queue in the database.
 pub async fn clear_queue(pool: &Graph) -> Result<()> {
     let cypher_string = r#"
         MATCH (a:Queue)
@@ -132,6 +137,7 @@ pub async fn clear_queue(pool: &Graph) -> Result<()> {
     Ok(())
 }
 
+/// Populates the queue from an `ArchiveMap`, marking the first batch (0) as pending.
 pub async fn push_queue_from_archive_map(map: &ArchiveMap, pool: &Graph) -> Result<()> {
     for (_, a) in map.0.iter() {
         // set at least one batch of each archive_id to false, so it gets picked up in the queue

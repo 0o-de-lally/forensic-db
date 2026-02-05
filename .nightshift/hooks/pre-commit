@@ -1,0 +1,57 @@
+#!/bin/bash
+#
+# Nightshift Pre-Commit Hook
+# 
+# Enforces nag completion before allowing commits.
+# Blocks commit if any nag in .nightshift/state/nag-status.json is "NOK".
+#
+# Installation:
+#   cp .nightshift/hooks/pre-commit .git/hooks/pre-commit
+#   chmod +x .git/hooks/pre-commit
+#
+# Bypass (human-supervised):
+#   NIGHTSHIFT_BYPASS=1 git commit -m "message"
+#
+
+NAG_STATUS_PATH="$(git rev-parse --show-toplevel)/.nightshift/state/nag-status.json"
+
+# Bypass check
+if [ -n "$NIGHTSHIFT_BYPASS" ]; then
+    echo "⚠️  Nightshift nag check bypassed"
+    exit 0
+fi
+
+# Skip if no nag status file
+[ -f "$NAG_STATUS_PATH" ] || exit 0
+
+# Find incomplete nags (requires jq)
+if command -v jq &> /dev/null; then
+    INCOMPLETE=$(jq -r '.nags | to_entries[] | select(.value != "OK") | .key' "$NAG_STATUS_PATH" 2>/dev/null)
+else
+    # Fallback: check for NOK string
+    if grep -q '"NOK"' "$NAG_STATUS_PATH" 2>/dev/null; then
+        INCOMPLETE="(install jq for detailed nag info)"
+    else
+        INCOMPLETE=""
+    fi
+fi
+
+# Allow if all nags are OK
+[ -z "$INCOMPLETE" ] && exit 0
+
+# Block commit
+echo ""
+echo "╔════════════════════════════════════════════════════════════╗"
+echo "║            ❌ COMMIT BLOCKED - INCOMPLETE NAGS             ║"
+echo "╠════════════════════════════════════════════════════════════╣"
+while IFS= read -r nag; do
+    printf "║  • %-54s  ║\n" "$nag"
+done <<< "$INCOMPLETE"
+echo "╠════════════════════════════════════════════════════════════╣"
+echo "║  Fix issues, then run: /update-nag-status                 ║"
+echo "║                                                            ║"
+echo "║  To bypass (human-supervised only):                        ║"
+echo "║    NIGHTSHIFT_BYPASS=1 git commit ...                      ║"
+echo "╚════════════════════════════════════════════════════════════╝"
+echo ""
+exit 1
