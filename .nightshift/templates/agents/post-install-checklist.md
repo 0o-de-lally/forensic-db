@@ -99,9 +99,9 @@ Tell the user:
     ```
 
 2. **Curator will:**
-    - Index `START_HERE.md` anchor
+    - Index the root `README.md` anchor
     - Build knowledge graph from documentation fractal
-    - Update `.opencode/command/docs-index.md`
+    - Update `./docs/project-index.md`
 
 ## Summary Output
 

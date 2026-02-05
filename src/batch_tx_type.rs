@@ -1,6 +1,9 @@
 use std::fmt::Display;
 
-/// response for the batch insert tx
+/// Response metadata for a batch transaction insertion.
+///
+/// Tracks the number of unique, created, modified, and unchanged accounts,
+/// as well as the total number of transactions created in the batch.
 #[derive(Debug, Clone)]
 pub struct BatchTxReturn {
     pub unique_accounts: u64,
@@ -29,6 +32,7 @@ impl Default for BatchTxReturn {
 }
 
 impl BatchTxReturn {
+    /// Creates a new, empty `BatchTxReturn`.
     pub fn new() -> Self {
         Self {
             unique_accounts: 0,
@@ -38,6 +42,8 @@ impl BatchTxReturn {
             created_tx: 0,
         }
     }
+
+    /// Increments the current counts with values from another `BatchTxReturn`.
     pub fn increment(&mut self, new: &BatchTxReturn) {
         self.unique_accounts += new.unique_accounts;
         self.created_accounts += new.created_accounts;

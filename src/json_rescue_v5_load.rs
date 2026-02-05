@@ -17,8 +17,7 @@ use tokio::sync::Semaphore;
 /// When we attempt insert, the chunks of txs that go in to each query
 static QUERY_BATCH_SIZE: usize = 250;
 
-/// from a tgz file decompress all the .json files in archive
-/// and then read into the warehouse record format
+/// Decompresses a `.tgz` archive and extracts/loads all contained V5 JSON transactions.
 pub async fn single_thread_decompress_extract(tgz_file: &Path, pool: &Graph) -> Result<u64> {
     let temppath = decompress_to_temppath(tgz_file)?;
     // for caching the archive
@@ -77,6 +76,7 @@ pub async fn single_thread_decompress_extract(tgz_file: &Path, pool: &Graph) -> 
     Ok(created_count)
 }
 
+/// Concurrently processes multiple `.tgz` archives using a limited number of threads.
 pub async fn rip_concurrent_limited(
     start_dir: &Path,
     pool: &Graph,

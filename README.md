@@ -1,5 +1,7 @@
 # forensic-db
 
+[Project Index](docs/project-index.md)
+
 An ETL system for processing Libra backup archives from genesis to present into a graph database.
 
 Uses Open Cypher for compatibility with Neo4j, AWS Neptune, Memgraph, etc.

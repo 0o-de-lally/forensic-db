@@ -13,6 +13,10 @@ use log::{error, info, warn};
 use serde_json::json;
 use std::path::Path;
 
+/// Extracts all transactions and events from a given archive path.
+///
+/// This function reads the `transaction.manifest` and processes each chunk to extract
+/// successful user transactions and their associated events.
 pub async fn extract_current_transactions(
     archive_path: &Path,
     framework_version: &FrameworkVersion,
@@ -100,6 +104,7 @@ pub async fn extract_current_transactions(
     Ok((user_txs, events))
 }
 
+/// Constructs a `WarehouseTxMaster` from a signed user transaction and its context.
 pub fn make_master_tx(
     user_tx: &SignedTransaction,
     epoch: u64,
@@ -144,6 +149,10 @@ pub fn make_master_tx(
     Ok(tx)
 }
 
+/// Decodes raw contract events into `WarehouseEvent` structures.
+///
+/// Filters out noisy events like `NewBlockEvent` and attempts to parse
+/// standard events (Withdraw, Deposit, CoinRegister).
 pub fn decode_events(
     tx_hash: HashValue,
     tx_events: &[ContractEvent],

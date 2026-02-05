@@ -6,6 +6,7 @@ use neo4rs::Graph;
 use serde::{Deserialize, Serialize};
 use std::path::Path;
 
+/// Metadata for account ownership mapping (whitepages).
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Whitepages {
     #[serde(deserialize_with = "de_address_from_any_string")]
@@ -15,11 +16,13 @@ pub struct Whitepages {
 }
 
 impl Whitepages {
+    /// Parses a JSON file containing whitepages data.
     pub fn parse_json_file(path: &Path) -> Result<Vec<Self>> {
         let s = std::fs::read_to_string(path)?;
         Ok(serde_json::from_str(&s)?)
     }
 
+    /// Converts the struct into a Cypher-compatible object string.
     pub fn to_cypher_object_template(&self) -> String {
         if let Some(addr) = &self.address {
             format!(
@@ -33,7 +36,7 @@ impl Whitepages {
         }
     }
 
-    /// create a cypher query string for the map object
+    /// Creates a Cypher map string from a list of `Whitepages` objects.
     pub fn to_cypher_map(list: &[Self]) -> String {
         let mut list_literal = "".to_owned();
         for el in list {
@@ -50,6 +53,7 @@ impl Whitepages {
         format!("[{}]", list_literal)
     }
 
+    /// Generates a Cypher query to batch link addresses to owner aliases.
     pub fn cypher_batch_link_owner(list_str: &str) -> String {
         format!(
             r#"
@@ -69,6 +73,7 @@ impl Whitepages {
     }
 }
 
+/// Batches and inserts whitepages data into the Neo4j database.
 pub async fn impl_batch_tx_insert(pool: &Graph, batch_txs: &[Whitepages]) -> Result<u64> {
     let mut unique_owners = vec![];
     batch_txs.iter().for_each(|t| {

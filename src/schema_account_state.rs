@@ -2,7 +2,7 @@ use libra_types::exports::AccountAddress;
 
 use crate::scan::FrameworkVersion;
 
-// holds timestamp, chain height, and epoch
+/// Metadata for the time and version of an account state snapshot.
 #[derive(Debug, Clone, Default)]
 pub struct WarehouseTime {
     pub framework_version: FrameworkVersion,
@@ -10,8 +10,9 @@ pub struct WarehouseTime {
     pub version: u64,
     pub epoch: u64,
 }
+
+/// The warehouse record for an account's state at a specific version.
 #[derive(Debug, Clone)]
-/// The basic information for an account
 pub struct WarehouseAccState {
     pub address: AccountAddress,
     pub time: WarehouseTime,
@@ -55,8 +56,7 @@ impl WarehouseAccState {
 }
 
 impl WarehouseAccState {
-    /// creates one transaction record in the cypher query map format
-    /// Note original data was in an RFC rfc3339 with Z for UTC, Cypher seems to prefer with offsets +00000
+    /// Converts the account state into a Cypher-compatible object string.
     pub fn acc_state_to_cypher_map(&self) -> String {
         let slow_wallet_unlocked_literal = match self.slow_wallet_unlocked {
             Some(n) => n.to_string(),
@@ -88,7 +88,7 @@ impl WarehouseAccState {
         )
     }
 
-    /// create a cypher query string for the map object
+    /// Converts a slice of account states into a Cypher map string.
     pub fn to_cypher_map(list: &[Self]) -> String {
         let mut list_literal = "".to_owned();
         for el in list {
@@ -100,6 +100,7 @@ impl WarehouseAccState {
         format!("[{}]", list_literal)
     }
 
+    /// Generates a Cypher query for batch inserting account states and snapshots.
     pub fn cypher_batch_insert_str(list_str: &str) -> String {
         format!(
             r#"

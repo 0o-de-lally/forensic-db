@@ -5,6 +5,7 @@ use log::info;
 
 use crate::schema_exchange_orders::{self, ExchangeOrder};
 
+/// Reads exchange orders from a JSON file and deserializes them.
 pub fn read_orders_from_file<P: AsRef<Path>>(path: P) -> Result<Vec<ExchangeOrder>> {
     let mut file = File::open(path)?;
     let mut json_data = String::new();

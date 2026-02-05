@@ -1,9 +1,10 @@
 //! organic free trade template literals for cypher queries
 use anyhow::{Context, Result};
 
-// batch tx submission query
-// takes a Cypher Map object `list_str`
-// and unwinds it into multiple merge operations
+/// Generates a Cypher query string for batch transaction submission.
+///
+/// Takes a string representation of a list of transaction objects and unwinds it
+/// to perform multiple `MERGE` operations for accounts and relationships.
 pub fn write_batch_tx_string(list_str: &str) -> String {
     format!(
         r#"
@@ -186,6 +187,10 @@ RETURN
 //     )
 // }
 
+/// Generates a Cypher query string for batch account creation.
+///
+/// Deduplicates addresses from a transaction list and performs `MERGE` operations
+/// to ensure all involved accounts exist in the database.
 pub fn write_batch_user_create(list_str: &str) -> String {
     format!(
         r#"

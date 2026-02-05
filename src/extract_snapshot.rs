@@ -24,7 +24,9 @@ use crate::{
     util::COIN_DECIMAL_PRECISION,
 };
 
-// uses libra-compatibility to parse the v5 manifest files, and decode v5 format bytecode into current version data structures (v6+);
+/// Extracts account states from a V5 framework snapshot archive.
+///
+/// Decodes V5 framework bytecode into current version data structures.
 pub async fn extract_v5_snapshot(archive_path: &Path) -> Result<Vec<WarehouseAccState>> {
     let v5_manifest_path = archive_path.join("state.manifest");
     // NOTE: this is duplicated with next step.
@@ -82,6 +84,7 @@ pub async fn extract_v5_snapshot(archive_path: &Path) -> Result<Vec<WarehouseAcc
     Ok(warehouse_state)
 }
 
+/// Extracts account states from a current (V6+) framework snapshot archive.
 pub async fn extract_current_snapshot(archive_path: &Path) -> Result<Vec<WarehouseAccState>> {
     let manifest_file = archive_path.join("state.manifest");
     assert!(

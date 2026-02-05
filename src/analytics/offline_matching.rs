@@ -12,18 +12,21 @@ use log::{info, trace, warn};
 use neo4rs::Graph;
 use serde::{Deserialize, Serialize};
 
+/// A record of a deposit made to the exchange's on-chain address.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Deposit {
     pub account: AccountAddress,
     pub deposited: f64,
 }
 
+/// Statistics about the funding requirements of an exchange user.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct MinFunding {
     pub user_id: u32,
     pub funded: f64,
 }
 
+/// Retrieves the total deposits per account for a given date range.
 pub async fn get_date_range_deposits_alt(
     pool: &Graph,
     _top_n: u64,
@@ -93,6 +96,7 @@ pub async fn get_date_range_deposits_alt(
     Ok(top_deposits)
 }
 
+/// Retrieves the top N exchange users by total funding within a date range.
 pub async fn get_exchange_users(
     pool: &Graph,
     top_n: u64,
@@ -197,12 +201,14 @@ pub async fn get_one_exchange_user(
     Ok(min_funding)
 }
 
+/// State for matching exchange user IDs to on-chain addresses.
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Matching {
     pub definite: BTreeMap<u32, AccountAddress>,
     pub pending: BTreeMap<u32, Candidates>,
 }
 
+/// Candidate on-chain addresses for a specific exchange user.
 #[derive(Clone, Default, Debug, Serialize, Deserialize)]
 pub struct Candidates {
     pub maybe: Vec<AccountAddress>,

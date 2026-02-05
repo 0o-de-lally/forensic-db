@@ -2,6 +2,7 @@ use libra_backwards_compatibility::version_five::transaction_type_v5::Transactio
 
 use libra_backwards_compatibility::version_five::transaction_view_v5::BytesView;
 
+/// Converts a `BytesView` from a V5 RPC into a `TransactionV5` and prints it.
 pub fn bytesview_to_transaction_v5(b: &BytesView) {
     let tx: TransactionV5 = bcs::from_bytes(b.inner()).unwrap();
     if let TransactionV5::UserTransaction(signed_transaction) = tx {

@@ -21,7 +21,7 @@ Create a comprehensive plan before writing code.
 
 **Create Plan Document:**
 
-- Location: `docs/plan/<module_name>_plan.md`
+- Location: `docs/plan/<module-name>-plan.md`
 - Include:
     - Product features being built
     - Technical implementation details (libraries, patterns, architecture)
@@ -53,10 +53,13 @@ The plan is **not static** - it's the source of truth.
 
 Structure the codebase before implementing logic.
 
+**CRITICAL**: All new documentation (including the module plan and README) must follow the rules in:
+👉 `docs/documentation-rules.md`
+
 **Generate Stubs:**
 
 - Create all file structures, classes, function signatures
-- Add module `README.md`
+- Add module `README.md` (Note: Only `README.md` is allowed outside `./docs/`)
 - Write extensive inline comments (JSDoc/Docstring)
 - Ensure code compiles/lints (use `throw new Error("Not implemented")`)
 

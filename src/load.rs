@@ -72,6 +72,7 @@ pub async fn ingest_all(
     Ok(())
 }
 
+/// Attempts to load a single archive into the database based on its manifest type.
 pub async fn try_load_one_archive(
     man: &ManifestInfo,
     pool: &Graph,

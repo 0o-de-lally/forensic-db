@@ -67,6 +67,7 @@ pub async fn get_neo4j_remote_pool(uri: &str, user: &str, pass: &str) -> Result<
     Ok(Graph::new(uri, user, pass).await?)
 }
 
+/// Retrieves Neo4j credentials from environment variables.
 pub fn get_credentials_from_env() -> Result<(String, String, String)> {
     let uri = std::env::var(URI_ENV).context(format!("could not get env var {}", URI_ENV))?;
     let user = std::env::var(USER_ENV).context(format!("could not get env var {}", USER_ENV))?;
@@ -75,6 +76,7 @@ pub fn get_credentials_from_env() -> Result<(String, String, String)> {
     Ok((uri, user, pass))
 }
 
+/// Initializes the database with constraints and indexes if they don't already exist.
 pub async fn maybe_create_indexes(graph: &Graph) -> Result<()> {
     let mut txn = graph.start_txn().await?;
 

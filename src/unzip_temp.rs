@@ -51,7 +51,7 @@ fn decompress_file(src_path: &Path, dst_dir: &Path, tar_opt: bool) -> Result<Pat
     Ok(dst_path)
 }
 
-/// decompress a tar.gz or .tgz file (and Archive of Deflate compressed files)
+/// Decompresses a `.tar.gz` or `.tgz` archive into the specified destination directory.
 pub fn decompress_tar_archive(src_path: &Path, dst_dir: &Path) -> Result<()> {
     // Open the source file in read-only mode
     let src_file = File::open(src_path)?;
@@ -65,9 +65,9 @@ pub fn decompress_tar_archive(src_path: &Path, dst_dir: &Path) -> Result<()> {
     Ok(())
 }
 
-/// Unzip all .gz files into the same directory
-/// Warning: this will take up a lot of disk space, should not be used in production for all files. Use for on the fly decompression.
-/// NOTE: Not for tarballs
+/// Decompresses all `.gz` files in a directory and its subdirectories.
+///
+/// Note: This is intended for individual compressed files, not tarballs.
 pub fn decompress_all_gz(parent_dir: &Path, dst_dir: &Path) -> Result<()> {
     let path = parent_dir.canonicalize()?;
 
@@ -118,9 +118,10 @@ fn maybe_fix_manifest(archive_path: &Path) -> Result<()> {
     Ok(())
 }
 
-/// If we are using this tool with .gz files, we will unzip on the fly
-/// If the user prefers to not do on the fly, then they need to update
-/// their workflow to `gunzip -r` before starting this.
+/// Handles on-the-fly decompression of `.gz` files if they are found in the archive path.
+///
+/// Returns the path to the (possibly temporary) decompressed directory and an
+/// optional `TempPath` handle.
 pub fn maybe_handle_gz(archive_path: &Path) -> Result<(PathBuf, Option<TempPath>)> {
     // maybe stuff isn't unzipped yet
     let pattern = format!("{}/*.*.gz", archive_path.display());

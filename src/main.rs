@@ -1,4 +1,8 @@
-//! entry point
+//! # Libra Forensic DB CLI
+//!
+//! Entry point for the `libra-forensic-db` binary.
+//! Provides a command-line interface for ingesting Libra blockchain archives
+//! into a Neo4j graph database.
 use clap::Parser;
 use libra_forensic_db::{log_setup, warehouse_cli::WarehouseCli};
 
