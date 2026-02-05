@@ -105,7 +105,7 @@ pub enum Sub {
         archive_dir: PathBuf,
     },
     /// Start a local Neo4j instance using Docker
-    StartDb {
+    LocalDockerDb {
         #[clap(long, default_value = "./neo4j_data")]
         /// Local directory to store data
         data_dir: PathBuf,
@@ -239,7 +239,7 @@ impl WarehouseCli {
                 )
                 .await?;
             }
-            Sub::StartDb {
+            Sub::LocalDockerDb {
                 data_dir,
                 docker_image,
             } => {
