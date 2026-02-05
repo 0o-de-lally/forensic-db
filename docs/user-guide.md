@@ -20,6 +20,18 @@ Process specific archive types:
 libra-forensic-db ingest --start-path <path> --content-type <type>
 ```
 
+### Local Docker DB
+
+Start a persistent local Neo4j instance using Docker (requires Docker to be installed):
+
+```bash
+# Start with defaults (data in ./neo4j_data)
+libra-forensic-db local-docker-db
+
+# Start with custom settings
+libra-forensic-db local-docker-db --data-dir /path/to/data --docker-image neo4j:latest
+```
+
 ### Enrich Exchange
 
 Add exchange transaction data:

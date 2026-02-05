@@ -12,8 +12,9 @@ Implement a new CLI subcommand to run a persistent Neo4j instance using Docker. 
 
 ## Current Status
 
-- **Completed**: Implemented `LocalDockerDb` subcommand in `src/warehouse_cli.rs` (renamed from `StartDb`).
+- **Completed**: Implemented `LocalDockerDb` subcommand in `src/warehouse_cli.rs`.
 - **Completed**: Added `neo4j_data/` to `.gitignore`.
+- **Completed**: Updated `docs/local-testing.md` and `docs/user-guide.md` with usage instructions.
 - **Verified**:
     - Started DB using `cargo run -- local-docker-db`.
     - Ingested test fixtures for v5, v6, and v7.
@@ -21,7 +22,6 @@ Implement a new CLI subcommand to run a persistent Neo4j instance using Docker. 
 
 ## Next Steps
 
-- (Optional) Document usage in README.md.
 - (Optional) Add CI/CD integration for Docker tests.
 
 ## Blockers
