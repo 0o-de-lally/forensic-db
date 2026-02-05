@@ -14,7 +14,28 @@ env:
   MODE_0L: "TESTNET"
 
 jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: setup env
+        uses: ./.github/actions/build_env
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: "forensic-db"
+          cache-all-crates: true
+          cache-on-failure: true
+
+      - name: check
+        uses: actions-rs/cargo@v1
+        with:
+          command: check
+          args: --workspace --tests
+
   clippy:
+    needs: check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
