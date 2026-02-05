@@ -2,7 +2,7 @@ use anyhow::{Context, Result};
 use diem_temppath::TempPath;
 use flate2::read::GzDecoder;
 use glob::glob;
-// use libra_storage::read_tx_chunk::load_tx_chunk_manifest;
+// use crate::read_tx_chunk::load_tx_chunk_manifest;
 use log::{info, warn};
 use std::{
     fs::File,

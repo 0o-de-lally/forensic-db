@@ -1,4 +1,5 @@
 use crate::decode_entry_function::decode_entry_function_all_versions;
+use crate::read_tx_chunk::{load_chunk, load_tx_chunk_manifest};
 use crate::scan::FrameworkVersion;
 use crate::schema_transaction::{RelationLabel, UserEventTypes, WarehouseEvent, WarehouseTxMaster};
 use anyhow::Result;
@@ -7,7 +8,6 @@ use diem_crypto::HashValue;
 use diem_types::account_config::{NewBlockEvent, WithdrawEvent};
 use diem_types::contract_event::ContractEvent;
 use diem_types::{account_config::DepositEvent, transaction::SignedTransaction};
-use libra_storage::read_tx_chunk::{load_chunk, load_tx_chunk_manifest};
 use libra_types::move_resource::coin_register_event::CoinRegisterEvent;
 use log::{error, info, warn};
 use serde_json::json;
@@ -33,30 +33,14 @@ pub async fn extract_current_transactions(
     let mut user_txs: Vec<WarehouseTxMaster> = vec![];
     let mut events: Vec<WarehouseEvent> = vec![];
 
+    let mut count_excluded = 0;
+
     for each_chunk_manifest in manifest.chunks {
         let chunk = load_chunk(archive_path, each_chunk_manifest).await?;
 
         for (i, tx) in chunk.txns.iter().enumerate() {
-            // TODO: unsure if this is off by one
-            // perhaps reverse the vectors before transforming
-
-            // first increment the block metadata. This assumes the vector is sequential.
+            // first collect the block metadata. This assumes the vector is sequential.
             if let Some(block) = tx.try_as_block_metadata() {
-                // // check the epochs are incrementing or not
-                // if epoch > block.epoch()
-                //     && round > block.round()
-                //     && timestamp > block.timestamp_usecs()
-                // {
-                //     dbg!(
-                //         epoch,
-                //         block.epoch(),
-                //         round,
-                //         block.round(),
-                //         timestamp,
-                //         block.timestamp_usecs()
-                //     );
-                // }
-
                 epoch = block.epoch();
                 round = block.round();
                 timestamp = block.timestamp_usecs();
@@ -66,6 +50,13 @@ pub async fn extract_current_transactions(
                 .txn_infos
                 .get(i)
                 .expect("could not index on tx_info chunk, vectors may not be same length");
+
+            // only process successful transactions
+            if !tx_info.status().is_success() {
+                count_excluded += 1;
+                continue;
+            };
+
             let tx_hash_info = tx_info.transaction_hash();
 
             let tx_events = chunk
@@ -103,6 +94,8 @@ pub async fn extract_current_transactions(
             warn!("some transactions excluded from extraction");
         }
     }
+
+    info!("Excluding {} unsuccessful transactions", count_excluded);
 
     Ok((user_txs, events))
 }

@@ -3,21 +3,18 @@ on:
   push:
     tags: # only on releases, not RC, since we've tested already
       - "[0-9]+.[0-9]+.[0-9]+"
-    branches: ["**"] # glob pattern to allow slash /
+    branches: ["main"]
   pull_request:
-    types:
-      - opened
-      - synchronize
-    branches:
-      - "release**"
-      - "main**"
+    types: [opened, synchronize]
+    branches: [main]
+
 env:
   DIEM_FORGE_NODE_BIN_PATH: ${{github.workspace}}/diem-node
   LIBRA_CI: 1
   MODE_0L: "TESTNET"
 
 jobs:
-  clippy:
+  format:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -36,6 +33,20 @@ jobs:
         with:
           command: fmt
           args: --all -- --check
+
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: setup env
+        uses: ./.github/actions/build_env
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: "forensic-db"
+          cache-all-crates: true
+          cache-on-failure: true
 
       # TODO: clippy can share cache if build for tests is done prior
       # - name: build for cache

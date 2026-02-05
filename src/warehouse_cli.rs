@@ -12,7 +12,7 @@ use crate::{
     json_rescue_v5_load,
     load::{ingest_all, try_load_one_archive},
     load_exchange_orders,
-    neo4j_init::{self, get_credentials_from_env, PASS_ENV, URI_ENV, USER_ENV},
+    neo4j_init::{self, get_credentials_from_env},
     scan::{scan_dir_archive, BundleContent, ManifestInfo},
     unzip_temp, util,
 };
@@ -294,22 +294,19 @@ pub async fn try_db_connection_pool(cli: &WarehouseCli) -> Result<Graph> {
     let db = match get_credentials_from_env() {
         Ok((uri, user, password)) => Graph::new(uri, user, password).await?,
         Err(_) => {
-            if cli.db_uri.is_some() && cli.db_username.is_some() && cli.db_password.is_some() {
-                Graph::new(
-                    cli.db_uri.as_ref().unwrap(),
-                    cli.db_username.as_ref().unwrap(),
-                    cli.db_password.as_ref().unwrap(),
-                )
-                .await?
-            } else {
-                println!("Must pass DB credentials, either with CLI args or environment variable");
-                println!("call with --db-uri, --db-user, and --db-password");
-                println!(
-                    "Alternatively export credentials to env variables: {}, {}, {}",
-                    URI_ENV, USER_ENV, PASS_ENV
-                );
-                bail!("could not get a db instance with credentials");
-            }
+            let uri = cli
+                .db_uri
+                .as_ref()
+                .expect("Must pass --db-uri or set URI_ENV");
+            let user = cli
+                .db_username
+                .as_ref()
+                .expect("Must pass --db-user or set USER_ENV");
+            let password = cli
+                .db_password
+                .as_ref()
+                .expect("Must pass --db-password or set PASS_ENV");
+            Graph::new(uri, user, password).await?
         }
     };
     Ok(db)

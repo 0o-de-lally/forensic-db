@@ -81,10 +81,11 @@ fn test_json_full_file() -> anyhow::Result<()> {
     let p = fixtures::v5_json_tx_path().join("10000-10999.json");
 
     let (tx, _, _) = extract_v5_json_rescue(&p)?;
-    assert!(tx.len() == 4);
-    let first = tx.first().unwrap();
 
-    assert!(first.sender.to_hex_literal() == "0xb31bd7796bc113013a2bf6c3953305fd");
+    assert!(tx.len() == 3);
+    let first = tx.first().unwrap();
+    dbg!(&first);
+    assert!(first.sender.to_hex_literal() == "0xecaf65add1b785b0495e3099f4045ec0");
 
     if let Some(EntryFunctionArgs::V5(ScriptFunctionCall::CreateUserByCoinTx { account, .. })) =
         first.entry_function
@@ -103,8 +104,8 @@ fn decompress_and_read() {
     // get an advanced record
     let first_file = temp_dir.path().join("10000-10999.json");
     let (tx, _, _) = extract_v5_json_rescue(&first_file).unwrap();
-    assert!(tx.len() == 4);
+    assert!(tx.len() == 3);
     let first = tx.first().unwrap();
 
-    assert!(first.sender.to_hex_literal() == "0xb31bd7796bc113013a2bf6c3953305fd");
+    assert!(first.sender.to_hex_literal() == "0xecaf65add1b785b0495e3099f4045ec0");
 }

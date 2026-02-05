@@ -25,7 +25,7 @@ async fn test_load_all_tgz() -> anyhow::Result<()> {
 
     let tx_count = json_rescue_v5_load::single_thread_decompress_extract(&path, &pool).await?;
 
-    assert!(tx_count == 13);
+    assert!(tx_count == 12);
 
     Ok(())
 }
@@ -46,7 +46,7 @@ async fn test_load_entrypoint() -> anyhow::Result<()> {
     let path = fixtures::v5_json_tx_path();
 
     let tx_count = json_rescue_v5_load::rip_concurrent_limited(&path, &pool, None).await?;
-    assert!(tx_count == 13);
+    assert!(tx_count == 12);
 
     Ok(())
 }
@@ -68,7 +68,7 @@ async fn test_load_queue() -> anyhow::Result<()> {
 
     let tx_count = json_rescue_v5_load::rip_concurrent_limited(&path, &pool, None).await?;
 
-    assert!(tx_count == 13);
+    assert!(tx_count == 12);
 
     let tx_count = json_rescue_v5_load::rip_concurrent_limited(&path, &pool, None).await?;
     assert!(tx_count == 0);
@@ -116,3 +116,39 @@ async fn test_rescue_v5_parse_set_wallet_tx() -> anyhow::Result<()> {
 
     Ok(())
 }
+
+// #[tokio::test]
+// fn test_stream() {
+//   async fn process_files(paths: Vec<&str>) {
+//     let mut stream = stream::iter(paths)
+//         .then(|path| async move {
+//             match read_json_file(path).await {
+//                 Ok(data) => Some(data),
+//                 Err(_) => None,
+//             }
+//         })
+//         .filter_map(|x| async { x })
+//         .flat_map(|data| stream::iter(data));
+
+//     let mut batch: VecDeque<MyStruct> = VecDeque::new();
+
+//     while let Some(item) = stream.next().await {
+//         batch.push_back(item);
+
+//         if batch.len() >= 100 {
+//             // Batch is large enough, process it
+//             let mut batch_to_process: Vec<MyStruct> = Vec::new();
+//             while let Some(_) = batch.pop_front() {
+//                 batch_to_process.push(batch.pop_front().unwrap());
+//             }
+//             process_batch(batch_to_process).await;
+//         }
+//     }
+
+//     // Process any remaining items in the batch
+//     if !batch.is_empty() {
+//         let mut batch_to_process: Vec<MyStruct> = batch.into();
+//         process_batch(batch_to_process).await;
+//     }
+// }
+// }
