@@ -1,0 +1,55 @@
+{
+    "$schema": "https://opencode.ai/config.json",
+
+    "instructions": [".nightshift/AGENTS.md"],
+
+    "agent": {
+        "nightshift": {
+            "description": "Autonomous Nightshift Engineer - follows the Nightshift Protocol",
+            "mode": "primary",
+            "prompt": "{file:.nightshift/agents/engineer.md}",
+            "tools": {
+                "write": true,
+                "edit": true,
+                "bash": true
+            }
+        },
+        "nightshift-planner": {
+            "description": "Strategic planner for breaking down complex tasks",
+            "mode": "subagent",
+            "prompt": "{file:.nightshift/agents/planner.md}",
+            "tools": {
+                "write": false,
+                "edit": false,
+                "bash": false
+            }
+        }
+    },
+
+    "command": {
+        "git-brain-commit": {
+            "description": "Create a commit with Git-Brain metadata (reasoning ledger)",
+            "template": "{file:.nightshift/commands/git-brain-commit.md}"
+        },
+        "update-nag-status": {
+            "description": "Run quality checks and update nag status",
+            "template": "{file:.nightshift/commands/update-nag-status.md}"
+        },
+        "nag-check": {
+            "description": "Run all nag checks (build, test, lint)",
+            "template": "Run all quality checks for this project:\n\n1. Read `.nightshift/nags/javascript-nag.md` for the check protocol\n2. Run build, test, and lint commands\n3. Update `.nightshift/state/nag-status.json` with results\n4. Report the status of each nag\n\nIf any check fails, set that nag to \"NOK\" and explain what needs to be fixed."
+        },
+        "forward-prompt": {
+            "description": "Update the forward prompt with current session state",
+            "template": "Update `.nightshift/state/forward-prompt.md` with the current session state:\n\n1. Set the session ID and timestamps\n2. Describe the current objective\n3. List what has been accomplished\n4. Prioritize next steps\n5. Note any blockers\n6. Add context notes for the next agent\n\nMake the forward prompt detailed enough that another agent could pick up this work seamlessly."
+        },
+        "session-start": {
+            "description": "Initialize a Nightshift session",
+            "template": "Starting Nightshift session:\n\n1. Read `.nightshift/state/forward-prompt.md` for prior context\n2. Read `.nightshift/state/nag-status.json` for current nag states\n3. Summarize what you learned and what the previous agent was working on\n4. Ask what task should be worked on, or continue from the forward prompt\n\nOperate under the Nightshift Protocol defined in `.nightshift/AGENTS.md`."
+        },
+        "new-module": {
+            "description": "Start new module development workflow (Plan → Stub → Implement)",
+            "template": "{file:.nightshift/commands/new-module-development.md}\n\nModule name: $ARGUMENTS\n\nBegin the workflow by creating a plan document in `docs/plan/$ARGUMENTS_plan.md`."
+        }
+    }
+}
