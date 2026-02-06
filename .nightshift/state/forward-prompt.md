@@ -13,8 +13,8 @@ Implement a new CLI subcommand to run a persistent Neo4j instance using Docker. 
 ## Current Status
 
 - **Completed**: Implemented `LocalDockerDb` subcommand.
-- **Completed**: Documentation updated (Usage + Architecture/Tradeoffs).
-- **Refined**: Updated architecture docs to focus on technical challenges (JMT, proprietary formats) rather than analogies.
+- **Completed**: Documentation updated (Usage + Architecture/Tradeoffs + Mirrors).
+- **Tooling**: Created `scripts/inspect_cf_mirror.sh` to validate access to community data mirrors.
 
 ## Next Steps
 
@@ -27,5 +27,4 @@ None.
 ## Context Notes
 
 - **Command**: `cargo run -- local-docker-db`
-- **Docker Image**: `neo4j:5.12.0` (default)
-- **Data Directory**: `./neo4j_data` (default, gitignored)
+- **Mirrors**: Use `scripts/inspect_cf_mirror.sh` to check Cloudflare mirror status.
