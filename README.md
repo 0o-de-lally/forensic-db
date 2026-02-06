@@ -14,6 +14,9 @@ You will use Backup archives from https://github.com/0LNetworkCommunity/epoch-ar
 
 Note there are different Git branches for each of v5, v6, v7 archives.
 
+**Mirrors**:
+Alternative sources for the archives can be found here: https://github.com/0LNetworkCommunity/libra-archive-mirrors
+
 ## Build
 ```
 cargo build release
@@ -31,6 +34,8 @@ You should also unzip all the files (NOTE future versions of forensic-db will gz
 
 git clone https://github.com/0LNetworkCommunity/epoch-archive-mainnet  --depth 1  --branch v6
 ```
+
+(You can also check https://github.com/0LNetworkCommunity/libra-archive-mirrors for alternative locations)
 
 ### You must have a running NEO4j instance
 Export the DB credentials to environment variables, or pass them as arguments to the tool.
