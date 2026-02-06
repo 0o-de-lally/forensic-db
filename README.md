@@ -1,98 +1,209 @@
 # forensic-db
 
-[Project Index](docs/project-index.md)
+[![License](https://img.shields.io/badge/license-NOASSERTION-blue.svg)](LICENSE)
+[![Rust](https://img.shields.io/badge/rust-1.78%2B-orange.svg)](https://www.rust-lang.org)
 
-An ETL system for processing Libra backup archives from genesis to present into a graph database.
+An ETL system for processing Libra blockchain backup archives into a Neo4j graph database for forensic analysis and flow-of-funds investigation.
 
-Uses Open Cypher for compatibility with Neo4j, AWS Neptune, Memgraph, etc.
+## Overview
 
-By default uses Neo4j as target database.
+`forensic-db` ingests raw backup archives from the 0L/Libra blockchain (JMT/RocksDB snapshots) and transforms them into a queryable property graph. This enables powerful multi-hop traversals for tracing funds, analyzing trading patterns, and investigating on-chain behavior.
 
+**Key Features:**
+- 📊 **Graph-native storage** - Built for relationship traversal (A→B→C→D)
+- 🚀 **High-throughput ingestion** - Processes archives offline without RPC bottlenecks
+- 🔍 **Open Cypher queries** - Compatible with Neo4j, AWS Neptune, Memgraph
+- 🔧 **Enrichment support** - Add off-chain data (exchange orders, ownership mappings)
+- 🐳 **Docker-first** - Start a local Neo4j instance with one command
 
-## Source Files
-You will use Backup archives from https://github.com/0LNetworkCommunity/epoch-archive-mainnet
+**Use Cases:**
+- Flow-of-funds analysis
+- Exchange deposit/withdrawal tracking
+- Shill trader identification
+- Account relationship mapping
+- On-chain forensics
 
-Note there are different Git branches for each of v5, v6, v7 archives.
+## Quick Start
 
-**Mirrors**:
-Alternative sources for the archives can be found here: https://github.com/0LNetworkCommunity/libra-archive-mirrors
+### 1. Install
 
-## Build
-```
-cargo build release
-cp ./target/libra-forensic-db ~/.cargo/bin
-
-```
-
-## Load chain archives
-
-### NOTE you must clone the backup archive repo above.
-You should also unzip all the files (NOTE future versions of forensic-db will gzip extract for you).
-
-```
-# for example get the v6 data
-
-git clone https://github.com/0LNetworkCommunity/epoch-archive-mainnet  --depth 1  --branch v6
+```bash
+cargo build --release
+cp ./target/release/libra-forensic-db ~/.cargo/bin/
 ```
 
-(You can also check https://github.com/0LNetworkCommunity/libra-archive-mirrors for alternative locations)
+### 2. Start Database
 
-### You must have a running NEO4j instance
-Export the DB credentials to environment variables, or pass them as arguments to the tool.
+Use the built-in Docker command to launch a local Neo4j instance:
 
-If you don't have a running neo4j, you can use the [Neo4j desktop](https://neo4j.com/download/) tool to create a locally hosted db.
-If you're feeling lucky and want to use docker: https://neo4j.com/docs/operations-manual/current/docker/introduction
-
-```
-# to run docker and persist  data between restarts to a certain local directory
-docker run \
-    --restart always \
-    --publish=7474:7474 --publish=7687:7687 \
-    --env NEO4J_AUTH=none \
-    --volume=/path/to/your/data:/data \
-    neo4j:5.25.1-community
+```bash
+libra-forensic-db local-docker-db --data-dir ./neo4j_data
 ```
 
-### Using credentials
-```
-# Use these arguments in your env.
-export LIBRA_GRAPH_DB_URI='neo4j+s://example.databases.neo4j.io'
-export LIBRA_GRAPH_DB_USER='neo4j'
-export LIBRA_GRAPH_DB_PASS='your-password'
+Or use an existing Neo4j instance (see [Configuration](#configuration)).
 
-```
+### 3. Get Archive Data
 
-Or include in the command line arguments
-```
-libra-forensic-db --db-uri 'neo4j+s://example.databases.neo4j.io' --db-username 'neo4j' --db-password 'your-password' <sub-command e.g. ingest-all>
+Clone the backup archives repository:
 
+```bash
+# Clone v6 archives (or v5, v7 depending on your needs)
+git clone https://github.com/0LNetworkCommunity/epoch-archive-mainnet \
+  --depth 1 --branch v6
 ```
 
-### ingest data
-For example: ingest all archives for `transaction` records.
+**Alternative mirrors:** https://github.com/0LNetworkCommunity/libra-archive-mirrors
 
+### 4. Ingest Data
 
-```
-# change to the path where epoch-archive-mainnet repo is located
-cd epoch-archive-mainnet
-
-# to view detailed logs:
+```bash
+# Set log level
 export RUST_LOG=info
 
-# load all transactional backups from epoch archive
-libra-forensic-db ingest-all --start-path <path to epoch-archive> --archive-content transaction
-
+# Ingest transaction archives
+libra-forensic-db ingest-all \
+  --start-path ./epoch-archive-mainnet \
+  --archive-content transaction
 ```
 
-## Enrich data
-You can add off-chain data to the forensic db. Currently, exchange transactions are supported from JSON with the following format:
+### 5. Query the Graph
+
+Connect to Neo4j at `http://localhost:7474` and run Cypher queries:
+
+```cypher
+// Find all transactions from an account
+MATCH (a:Account {address: "0x123..."})-[tx:Tx]->(b:Account)
+RETURN a, tx, b
+LIMIT 50;
+
+// Trace flow of funds (3 hops)
+MATCH path = (a:Account)-[:Tx*1..3]->(b:Account)
+WHERE a.address = "0x123..."
+RETURN path;
+```
+
+See [Sample CQL Queries](docs/technical/sample-cql.md) for more examples.
+
+## Commands
+
+### Core Operations
+
+```bash
+# Ingest all archives in a directory
+libra-forensic-db ingest-all --start-path <archive-root> --archive-content transaction
+
+# Ingest a single archive
+libra-forensic-db ingest-one --archive-dir <path-to-archive>
+
+# Verify archive integrity
+libra-forensic-db check --archive-dir <path-to-archive>
+
+# Start local Neo4j with Docker
+libra-forensic-db local-docker-db --data-dir ./neo4j_data
+```
+
+### Enrichment & Analytics
+
+Add off-chain data or run analysis:
+
+```bash
+# Add exchange orders (see docs for JSON schema)
+libra-forensic-db enrich-exchange --exchange-json <orders.json>
+
+# Map account ownership
+libra-forensic-db enrich-whitepages --owner-json <owners.json>
+
+# Run exchange analytics
+libra-forensic-db analytics exchange-rms --persist
+
+# Match trades to deposits
+libra-forensic-db analytics trades-matching \
+  --start-day 2024-01-01 --end-day 2024-12-31
+```
+
+See [API Reference](docs/technical/api-reference.md) for complete command documentation.
+
+## Configuration
+
+### Environment Variables
+
+```bash
+export LIBRA_GRAPH_DB_URI='neo4j://localhost:7687'
+export LIBRA_GRAPH_DB_USER='neo4j'
+export LIBRA_GRAPH_DB_PASS='your-password'
+export RUST_LOG=info  # or debug, trace
+```
+
+### Command Line
+
+All commands accept database credentials as flags:
+
+```bash
+libra-forensic-db \
+  --db-uri 'neo4j+s://example.databases.neo4j.io' \
+  --db-username 'neo4j' \
+  --db-password 'your-password' \
+  <subcommand>
+```
+
+Additional options:
+- `--threads <n>` - Max parallel tasks (default: CPU count)
+- `--clear-queue` - Force clear the processing queue
+
+## Architecture
+
+**Why Graph?** Traditional SQL databases require expensive JOINs for multi-hop queries. Graph databases represent transfers as edges, making flow-of-funds analysis orders of magnitude faster.
+
+**Why Rust?** Processing terabytes of BCS-encoded Merkle tree snapshots requires maximum throughput and type safety. Rust's concurrency model enables aggressive parallelization without data races.
+
+**Why Offline Archives?** JSON-RPC is too slow, incomplete (pruned history), and rate-limited for bulk forensic analysis. Backup archives provide the "ground truth" raw bytes for the entire chain.
+
+See [Architecture Deep Dive](docs/technical/architecture.md) for design decisions and tradeoffs.
+
+## Documentation
+
+### User Guides
+- [Getting Started](docs/product/getting-started.md) - Detailed setup instructions
+- [User Guide](docs/product/user-guide.md) - Complete usage guide
+
+### Technical Docs
+- [Architecture](docs/technical/architecture.md) - System design and tradeoffs
+- [API Reference](docs/technical/api-reference.md) - Code documentation
+- [Sample CQL Queries](docs/technical/sample-cql.md) - Query cookbook
+- [Configuration](docs/technical/configuration.md) - Advanced configuration
+
+### Developer Docs
+- [Developer Guide](docs/development/developer-guide.md) - Contributing guidelines
+- [Source Index](docs/development/source-index.md) - Codebase overview
+- [Local Testing](docs/development/local-testing.md) - Testing strategies
+
+## Project Structure
 
 ```
-[{"user":1,"orderType":"Sell","amount":"40000.000","price":"0.00460","created_at":"2024-05-12T15:25:14.991Z","filled_at":"2024-05-14T15:04:13.000Z","accepter":3768}]
+forensic-db/
+├── src/
+│   ├── extract_*.rs      # Extract layer (decode archives)
+│   ├── load_*.rs         # Load layer (write to Neo4j)
+│   ├── enrich_*.rs       # Enrichment (off-chain data)
+│   ├── analytics/        # Analysis modules
+│   └── warehouse_cli.rs  # CLI entry point
+├── docs/
+│   ├── product/          # User-facing guides
+│   ├── technical/        # Architecture & specs
+│   └── development/      # Developer resources
+└── tests/
 ```
 
-#### enrich data
+## Contributing
 
-```
-libra-forensic-db enrich-exchange --exchange_json <path to .json file>
-```
+See [Developer Guide](docs/development/developer-guide.md) for contribution guidelines.
+
+## License
+
+NOASSERTION - See repository for details
+
+## Links
+
+- **Archive Repository:** https://github.com/0LNetworkCommunity/epoch-archive-mainnet
+- **Archive Mirrors:** https://github.com/0LNetworkCommunity/libra-archive-mirrors
+- **0L Network:** https://openlibra.io/
