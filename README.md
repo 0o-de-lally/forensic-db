@@ -147,7 +147,7 @@ libra-forensic-db \
 ```
 
 Additional options:
-- `--threads <n>` - Max parallel tasks (default: CPU count)
+- `--threads <n>` - Max parallel tasks
 - `--clear-queue` - Force clear the processing queue
 
 ## Architecture

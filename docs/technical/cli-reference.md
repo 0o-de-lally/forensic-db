@@ -63,7 +63,7 @@ libra-forensic-db ingest-all \
 |--------|-------|------|----------|-------------|
 | `--start-path` | `-d` | Path | Yes | Root directory to scan for archives |
 | `--archive-content` | `-c` | Enum | No | Type of archives to process: `transaction` or `account_state` |
-| `--batch-size` | `-b` | Number | No | Number of records per batch (default: 1000) |
+| `--batch-size` | `-b` | Number | No | Number of records per batch (default: 250) |
 
 **Examples:**
 
@@ -109,7 +109,7 @@ libra-forensic-db ingest-one \
 | Option | Short | Type | Required | Description |
 |--------|-------|------|----------|-------------|
 | `--archive-dir` | `-d` | Path | Yes | Path to specific archive directory |
-| `--batch-size` | `-b` | Number | No | Number of records per batch (default: 1000) |
+| `--batch-size` | `-b` | Number | No | Number of records per batch (default: 250) |
 
 **Examples:**
 
@@ -195,9 +195,9 @@ libra-forensic-db local-docker-db --docker-image neo4j:5.25.1-community
 **Behavior:**
 - Pulls Docker image if not present
 - Starts container on ports 7474 (HTTP) and 7687 (Bolt)
-- Uses `NEO4J_AUTH=none` (no authentication)
+- Default credentials: `neo4j` / `neo4j` (override with global `--db-username` / `--db-password`)
 - Persists data to `--data-dir`
-- Restarts automatically on reboot
+- Container is removed on exit (`--rm`)
 
 **Access:**
 - Neo4j Browser: http://localhost:7474
@@ -221,7 +221,7 @@ libra-forensic-db enrich-exchange \
 | Option | Type | Required | Description |
 |--------|------|----------|-------------|
 | `--exchange-json` | Path | Yes | JSON file with exchange orders |
-| `--batch-size` | Number | No | Records per batch (default: 1000) |
+| `--batch-size` | Number | No | Records per batch (default: 250) |
 
 **JSON Schema:**
 
@@ -549,16 +549,6 @@ libra-forensic-db ingest-one \
 libra-forensic-db --threads 1 ingest-one \
   --archive-dir ./epoch-archives/transaction/0000-0099
 ```
-
-## Exit Codes
-
-| Code | Meaning |
-|------|---------|
-| 0 | Success |
-| 1 | General error |
-| 2 | Connection error (database) |
-| 3 | Invalid arguments |
-| 4 | Archive error (missing/corrupt) |
 
 ## Performance Tips
 

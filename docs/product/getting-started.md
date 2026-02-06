@@ -23,7 +23,7 @@ A comprehensive guide to setting up and running the forensic-db ETL system.
 
 ```bash
 # Clone the repository
-git clone https://github.com/0LNetworkCommunity/forensic-db
+git clone https://github.com/0o-de-lally/forensic-db
 cd forensic-db
 
 # Build release binary
@@ -54,9 +54,9 @@ libra-forensic-db local-docker-db --data-dir ./neo4j_data
 
 This will:
 - Pull the Neo4j Docker image (if not present)
-- Start a persistent Neo4j instance on ports 7474 (HTTP) and 7687 (Bolt)
+- Start a Neo4j instance on ports 7474 (HTTP) and 7687 (Bolt)
 - Store data in `./neo4j_data`
-- Run with `NEO4J_AUTH=none` (no password required)
+- Default credentials: `neo4j` / `neo4j` (override with `--db-username` and `--db-password`)
 
 Access the Neo4j Browser at `http://localhost:7474`
 
@@ -146,7 +146,7 @@ libra-forensic-db \
 
 ### Clone the Archive Repository
 
-The 0L blockchain archives are stored in Git LFS repositories with separate branches for each version:
+The 0L blockchain archives are stored in Git repositories with separate branches for each version. Some archives are also available on S3-compatible mirrors:
 
 ```bash
 # Clone v6 archives (recommended for most users)
@@ -172,16 +172,9 @@ git clone https://github.com/0LNetworkCommunity/epoch-archive-mainnet \
 
 ### Alternative Archive Sources
 
-If GitHub is slow or unavailable, use alternative mirrors:
+If GitHub is slow or unavailable, use alternative mirrors (e.g., Cloudflare R2):
 
-**Cloudflare R2:**
-```bash
-# See instructions at:
-# https://github.com/0LNetworkCommunity/libra-archive-mirrors
-```
-
-**IPFS:**
-- Available via libra-archive-mirrors repository
+See https://github.com/0LNetworkCommunity/libra-archive-mirrors for available mirrors and instructions.
 
 ### Archive Structure
 
@@ -221,18 +214,10 @@ export RUST_LOG=info
 # Ingest all transaction archives
 libra-forensic-db ingest-all \
   --start-path . \
-  --archive-content transaction \
-  --batch-size 1000
+  --archive-content transaction
 ```
 
-**Expected output:**
-```
-INFO: Scanning for archives...
-INFO: Found 1234 archives
-INFO: Processing epoch 0000-0099...
-INFO: Loaded 50000 transactions in 2.3s
-...
-```
+Progress will be logged to stdout based on the `RUST_LOG` level.
 
 ### 3. Query Your Data
 
@@ -267,9 +252,8 @@ libra-forensic-db ingest-all \
 ### Batch Size
 
 Adjust `--batch-size` based on your system:
-- **Default:** 1000 (good for most systems)
-- **Low memory:** 500
-- **High memory:** 5000+
+- **Default:** 250
+- **More memory available:** 1000-5000
 
 ```bash
 libra-forensic-db ingest-all \
@@ -333,8 +317,8 @@ Error: No archives found at path
 
 **Solutions:**
 1. Verify archive path is correct
-2. Check Git LFS files are downloaded: `git lfs pull`
-3. Ensure you're in the correct branch (v5, v6, or v7)
+2. Ensure you're in the correct branch (v5, v6, or v7)
+3. Check that archive files are fully downloaded (not just git stubs)
 
 ### Slow Ingestion
 
@@ -398,6 +382,6 @@ libra-forensic-db ingest-one --archive-dir ./epoch-archives/transaction/0000-009
 
 ## Support
 
-- **Issues:** https://github.com/0LNetworkCommunity/forensic-db/issues
+- **Issues:** https://github.com/0o-de-lally/forensic-db/issues
 - **Documentation:** [docs/](../README.md)
 - **Neo4j Help:** https://neo4j.com/docs/

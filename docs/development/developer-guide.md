@@ -7,7 +7,7 @@ Instructions for contributing to forensic-db development.
 ### Clone Repository
 
 ```bash
-git clone https://github.com/your-org/forensic-db.git
+git clone https://github.com/0o-de-lally/forensic-db.git
 cd forensic-db
 ```
 
@@ -43,26 +43,28 @@ forensic-db/
 ├── src/
 │   ├── lib.rs           # Library entry point
 │   ├── main.rs          # CLI entry point
+│   ├── warehouse_cli.rs # CLI command definitions
 │   ├── extract_*.rs     # Extraction modules
 │   ├── load_*.rs        # Loading modules
 │   ├── enrich_*.rs      # Enrichment modules
+│   ├── schema_*.rs      # Data structure definitions
 │   └── analytics/       # Analytics modules
 ├── docs/
-│   ├── getting-started.md
-│   ├── architecture.md
-│   ├── user-guide.md
-│   └── developer-guide.md
+│   ├── product/         # User-facing guides
+│   ├── technical/       # Architecture & specs
+│   ├── development/     # Developer resources
+│   └── specs/           # Feature specifications
 ├── tests/
 │   ├── fixtures/        # Test data
-│   └── integration/     # Integration tests
+│   └── support/         # Test helpers
 └── Cargo.toml
 ```
 
 ## Adding New Features
 
 1. Create module in appropriate directory
-2. Add to `src/lib.rs`
-3. Add CLI command to `main.rs` if needed
+2. Add `pub mod` declaration to `src/lib.rs`
+3. Add CLI subcommand to `src/warehouse_cli.rs` if needed
 4. Write tests
 5. Update documentation
 

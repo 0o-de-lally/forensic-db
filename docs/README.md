@@ -38,7 +38,7 @@ Feature specs and design documents:
 
 ## Quick Links
 
-- **Repository:** [forensic-db](https://github.com/0LNetworkCommunity/forensic-db)
+- **Repository:** [forensic-db](https://github.com/0o-de-lally/forensic-db)
 - **Archive Source:** [epoch-archive-mainnet](https://github.com/0LNetworkCommunity/epoch-archive-mainnet)
 - **Archive Mirrors:** [libra-archive-mirrors](https://github.com/0LNetworkCommunity/libra-archive-mirrors)
 
