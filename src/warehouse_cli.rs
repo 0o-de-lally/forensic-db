@@ -104,6 +104,16 @@ pub enum Sub {
         /// starting path for v5 .tgz files
         archive_dir: PathBuf,
     },
+    /// Start a local Neo4j instance using Docker
+    LocalDockerDb {
+        #[clap(long, default_value = "./neo4j_data")]
+        /// Local directory to store data
+        data_dir: PathBuf,
+
+        #[clap(long, default_value = "neo4j:5.12.0")]
+        /// Docker image tag to use
+        docker_image: String,
+    },
     #[clap(subcommand)]
     Analytics(AnalyticsSub),
 }
@@ -228,6 +238,65 @@ impl WarehouseCli {
                     self.threads.to_owned(),
                 )
                 .await?;
+            }
+            Sub::LocalDockerDb {
+                data_dir,
+                docker_image,
+            } => {
+                let current_dir = std::env::current_dir()?;
+                let abs_data_dir = if data_dir.is_absolute() {
+                    data_dir.clone()
+                } else {
+                    current_dir.join(data_dir)
+                };
+
+                // Create data and logs directories if they don't exist
+                std::fs::create_dir_all(&abs_data_dir)?;
+                let data_mount = abs_data_dir.join("data");
+                let logs_mount = abs_data_dir.join("logs");
+                std::fs::create_dir_all(&data_mount)?;
+                std::fs::create_dir_all(&logs_mount)?;
+
+                info!(
+                    "Starting Neo4j using docker image: {}, data dir: {}",
+                    docker_image,
+                    abs_data_dir.display()
+                );
+
+                // Use a default password 'neo4j' if not specified in env
+                // The CLI struct has db_password, but that's for connecting *to* the DB.
+                // We should probably use the same password if provided, or default to 'neo4j'.
+                // However, the standard Neo4j image expects NEO4J_AUTH=user/password
+                let user = self.db_username.as_deref().unwrap_or("neo4j");
+                let pass = self.db_password.as_deref().unwrap_or("neo4j");
+                let auth_env = format!("{}/{}", user, pass);
+
+                let status = std::process::Command::new("docker")
+                    .arg("run")
+                    .arg("--name")
+                    .arg("forensic-neo4j")
+                    .arg("--rm") // Remove container on exit
+                    .arg("-p")
+                    .arg("7474:7474")
+                    .arg("-p")
+                    .arg("7687:7687")
+                    .arg("-v")
+                    .arg(format!("{}:/data", data_mount.display()))
+                    .arg("-v")
+                    .arg(format!("{}:/logs", logs_mount.display()))
+                    .arg("--env")
+                    .arg(format!("NEO4J_AUTH={}", auth_env))
+                    // Increase heap memory for better performance
+                    .arg("--env")
+                    .arg("NEO4J_dbms_memory_heap_initial__size=1G")
+                    .arg("--env")
+                    .arg("NEO4J_dbms_memory_heap_max__size=2G")
+                    .arg(docker_image)
+                    .status()?;
+
+                if !status.success() {
+                    bail!("Docker command failed with status: {}", status);
+                }
             }
             Sub::Analytics(analytics_sub) => match analytics_sub {
                 AnalyticsSub::ExchangeRMS { persist } => {

@@ -12,7 +12,7 @@ Architectural guides, user manuals, and technical specifications for `forensic-d
 
 ## Nightshift Protocol
 This project uses the Nightshift semi-autonomous engineering framework.
-- [AGENTS.md](../.nightshift/AGENTS.md)
+- [AGENTS.md](../.nightshift/agents.md)
 
 ## Navigation
 - [Project Index](project-index.md)

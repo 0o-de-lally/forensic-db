@@ -1,35 +1,31 @@
 # Forward Prompt
 
-This file maintains context between agent sessions. Update it regularly.
-
 ## Current Session
 
-**Session ID**: (not started)
-**Started**: (not started)
-**Last Updated**: (not started)
+**Session ID**: session-001
+**Started**: Thu Feb 05 2026
+**Last Updated**: Thu Feb 05 2026
 
 ## Objective
 
-(Describe the high-level goal you're working toward)
+Implement a new CLI subcommand to run a persistent Neo4j instance using Docker. This avoids local Neo4j installation while ensuring data persistence across container restarts.
 
 ## Current Status
 
-(What has been accomplished so far)
+- **Completed**: Implemented `LocalDockerDb` subcommand.
+- **Completed**: Documentation updated (Usage + Architecture/Tradeoffs).
+- **Refined**: Updated architecture docs to focus on technical challenges (JMT, proprietary formats) rather than analogies.
 
 ## Next Steps
 
-1. (Most important next task)
-2. (Second priority)
-3. (Third priority)
+- Merge PR.
 
 ## Blockers
 
-(Any issues preventing progress - leave empty if none)
+None.
 
 ## Context Notes
 
-(Important context for the next agent picking up this work)
-
----
-
-_Update this file after completing significant steps, before commits, and every 10-15 minutes of active work._
+- **Command**: `cargo run -- local-docker-db`
+- **Docker Image**: `neo4j:5.12.0` (default)
+- **Data Directory**: `./neo4j_data` (default, gitignored)

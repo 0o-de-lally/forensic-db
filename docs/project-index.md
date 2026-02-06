@@ -19,6 +19,6 @@ Welcome to the forensic-db documentation. This index provides a map of the repos
 
 ## Infrastructure
 - [Cargo.toml](../Cargo.toml) - Dependencies and metadata
-- [Nightshift Protocol](../.nightshift/AGENTS.md) - Semi-autonomous engineering state
+- [Nightshift Protocol](../.nightshift/agents.md) - Semi-autonomous engineering state
 
 [Back to README](../README.md)
