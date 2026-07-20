@@ -2,23 +2,25 @@
 
 ## Current Session
 
-**Session ID**: session-001
-**Started**: Thu Feb 05 2026
-**Last Updated**: Thu Feb 05 2026
+**Session ID**: session-002
+**Started**: Fri Feb 06 2026
+**Last Updated**: Fri Feb 06 2026
 
 ## Objective
 
-Implement a new CLI subcommand to run a persistent Neo4j instance using Docker. This avoids local Neo4j installation while ensuring data persistence across container restarts.
+Set up tooling for rclone integration to manage data mirrors/backups.
 
 ## Current Status
 
-- **Completed**: Implemented `LocalDockerDb` subcommand.
-- **Completed**: Documentation updated (Usage + Architecture/Tradeoffs + Mirrors).
-- **Tooling**: Created `scripts/inspect_cf_mirror.sh` to validate access to community data mirrors.
+- **Branch**: `rclone-tools`
+- **Action**: Forked from `main` and cherry-picked relevant scripts/docs from `feature/start-db-cli`.
+- **Commits Cherry-picked**:
+    - `feat(scripts): add Cloudflare mirror inspection script`
+    - `docs: add link to archive mirrors`
 
 ## Next Steps
 
-- Merge PR.
+- Await further instructions on rclone tool implementation.
 
 ## Blockers
 
@@ -26,5 +28,4 @@ None.
 
 ## Context Notes
 
-- **Command**: `cargo run -- local-docker-db`
-- **Mirrors**: Use `scripts/inspect_cf_mirror.sh` to check Cloudflare mirror status.
+- **Branch**: `rclone-tools`

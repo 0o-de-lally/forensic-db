@@ -32,6 +32,8 @@ pub struct ManifestInfo {
     pub contents: BundleContent,
     /// Whether this archive has already been processed.
     pub processed: bool,
+    /// Optional storage descriptor for S3-backed archives.
+    pub storage_descriptor: Option<crate::storage::ArchiveDescriptor>,
 }
 
 impl ManifestInfo {
@@ -48,6 +50,7 @@ impl ManifestInfo {
             version: FrameworkVersion::Unknown,
             contents: BundleContent::Unknown,
             processed: false,
+            storage_descriptor: None,
         }
     }
 
@@ -174,6 +177,41 @@ pub fn scan_dir_archive(
         man.set_info()?;
         archive.insert(archive_dir.to_path_buf(), man);
     }
+    Ok(ArchiveMap(archive))
+}
+
+/// Async version of archive scanning using a storage backend trait.
+///
+/// This function works with both local and S3 storage backends,
+/// discovering archives via the backend's listing mechanism.
+pub async fn scan_archive<B: crate::storage::StorageBackend>(
+    backend: &B,
+    content_opt: Option<BundleContent>,
+) -> Result<ArchiveMap> {
+    let descriptors = backend.list_archives(content_opt).await?;
+
+    let mut archive = BTreeMap::new();
+
+    for descriptor in descriptors {
+        // For local storage, we can try to set version info immediately
+        // For S3, we'll need to materialize first, so we defer this
+        let archive_dir = PathBuf::from(&descriptor.remote_path);
+        let mut man = ManifestInfo {
+            archive_dir: archive_dir.clone(),
+            archive_id: descriptor.archive_id.clone(),
+            version: FrameworkVersion::Unknown,
+            contents: descriptor.content_type.clone(),
+            processed: false,
+            storage_descriptor: Some(descriptor),
+        };
+
+        // Try to determine framework version if it's a local file
+        // For S3, this will fail, but that's okay - we'll detect version during load
+        let _ = man.try_set_framework_version();
+
+        archive.insert(archive_dir, man);
+    }
+
     Ok(ArchiveMap(archive))
 }
 

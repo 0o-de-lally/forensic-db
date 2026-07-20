@@ -25,6 +25,7 @@ pub mod scan;
 pub mod schema_account_state;
 pub mod schema_exchange_orders;
 pub mod schema_transaction;
+pub mod storage;
 pub mod unzip_temp;
 pub mod util;
 pub mod v5_rpc_to_raw;

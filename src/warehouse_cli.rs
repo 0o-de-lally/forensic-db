@@ -10,10 +10,11 @@ use crate::{
     enrich_exchange_onboarding::{self, ExchangeOnRamp},
     enrich_whitepages::{self, Whitepages},
     json_rescue_v5_load,
-    load::{ingest_all, try_load_one_archive},
+    load::{ingest_all, ingest_all_generic, try_load_one_archive, try_load_one_archive_generic},
     load_exchange_orders,
     neo4j_init::{self, get_credentials_from_env},
-    scan::{scan_dir_archive, BundleContent, ManifestInfo},
+    scan::{scan_archive, scan_dir_archive, BundleContent, ManifestInfo},
+    storage::{LocalStorage, S3Storage, StorageBackend},
     unzip_temp, util,
 };
 
@@ -43,6 +44,30 @@ pub struct WarehouseCli {
     #[clap(long, short('t'))]
     /// max tasks to run in parallel
     threads: Option<usize>,
+
+    #[clap(long, default_value = "local")]
+    /// storage backend to use: "local" or "s3"
+    storage_backend: String,
+
+    #[clap(long)]
+    /// S3 endpoint URL (e.g., https://<account-id>.r2.cloudflarestorage.com)
+    s3_endpoint: Option<String>,
+
+    #[clap(long)]
+    /// S3 access key ID
+    s3_access_key: Option<String>,
+
+    #[clap(long)]
+    /// S3 secret access key
+    s3_secret_key: Option<String>,
+
+    #[clap(long, default_value = "libra-archives")]
+    /// S3 bucket name
+    s3_bucket: String,
+
+    #[clap(long, default_value = "")]
+    /// S3 object prefix for filtering
+    s3_prefix: String,
 
     #[clap(subcommand)]
     command: Sub,
@@ -160,12 +185,20 @@ impl WarehouseCli {
                 archive_content,
                 batch_size,
             } => {
-                let map = scan_dir_archive(start_path, archive_content.to_owned())?;
-
                 let pool = try_db_connection_pool(self).await?;
                 neo4j_init::maybe_create_indexes(&pool).await?;
 
-                ingest_all(&map, &pool, self.clear_queue, batch_size.unwrap_or(250)).await?;
+                // Use new storage backend system
+                if self.storage_backend == "local" {
+                    // Backward compatible: use original local path scanning
+                    let map = scan_dir_archive(start_path, archive_content.to_owned())?;
+                    ingest_all(&map, &pool, self.clear_queue, batch_size.unwrap_or(250)).await?;
+                } else {
+                    // Use generic backend system for S3 or other backends
+                    let backend = create_storage_backend(self, Some(start_path)).await?;
+                    let map = scan_archive(backend.as_ref(), archive_content.to_owned()).await?;
+                    ingest_all_generic(&map, backend.as_ref(), &pool, self.clear_queue, batch_size.unwrap_or(250)).await?;
+                }
             }
             Sub::IngestOne {
                 archive_dir,
@@ -182,12 +215,23 @@ impl WarehouseCli {
                 drop(temp);
             }
             Sub::Check { archive_dir } => {
-                let am = scan_dir_archive(archive_dir, None)?;
-                if am.0.is_empty() {
-                    error!("cannot find .manifest file under {}", archive_dir.display());
-                }
-                for (p, man) in am.0 {
-                    info!("manifest found at {} \n {:?}", p.display(), man);
+                if self.storage_backend == "local" {
+                    let am = scan_dir_archive(archive_dir, None)?;
+                    if am.0.is_empty() {
+                        error!("cannot find .manifest file under {}", archive_dir.display());
+                    }
+                    for (p, man) in am.0 {
+                        info!("manifest found at {} \n {:?}", p.display(), man);
+                    }
+                } else {
+                    let backend = create_storage_backend(self, Some(archive_dir)).await?;
+                    let am = scan_archive(backend.as_ref(), None).await?;
+                    if am.0.is_empty() {
+                        error!("cannot find .manifest files in S3");
+                    }
+                    for (p, man) in am.0 {
+                        info!("manifest found at {} \n {:?}", p.display(), man);
+                    }
                 }
             }
             Sub::EnrichExchange {
@@ -383,4 +427,57 @@ pub async fn try_db_connection_pool(cli: &WarehouseCli) -> Result<Graph> {
         }
     };
     Ok(db)
+}
+
+/// Creates a storage backend based on CLI arguments.
+async fn create_storage_backend(
+    cli: &WarehouseCli,
+    start_path: Option<&PathBuf>,
+) -> Result<Box<dyn StorageBackend>> {
+    match cli.storage_backend.as_str() {
+        "local" => {
+            let path = start_path
+                .ok_or_else(|| anyhow::anyhow!("local storage requires --start-path"))?
+                .clone();
+            Ok(Box::new(LocalStorage::new(path)))
+        }
+        "s3" => {
+            // Try CLI args first, then fall back to environment variables
+            let endpoint = cli
+                .s3_endpoint
+                .clone()
+                .or_else(|| std::env::var("S3_ENDPOINT").ok())
+                .ok_or_else(|| anyhow::anyhow!("S3 storage requires --s3-endpoint or S3_ENDPOINT env"))?;
+
+            let access_key = cli
+                .s3_access_key
+                .clone()
+                .or_else(|| std::env::var("S3_ACCESS_KEY").ok())
+                .ok_or_else(|| anyhow::anyhow!("S3 storage requires --s3-access-key or S3_ACCESS_KEY env"))?;
+
+            let secret_key = cli
+                .s3_secret_key
+                .clone()
+                .or_else(|| std::env::var("S3_SECRET_KEY").ok())
+                .ok_or_else(|| anyhow::anyhow!("S3 storage requires --s3-secret-key or S3_SECRET_KEY env"))?;
+
+            let bucket = if cli.s3_bucket == "libra-archives" {
+                // Check if env var is set
+                std::env::var("S3_BUCKET").unwrap_or_else(|_| cli.s3_bucket.clone())
+            } else {
+                cli.s3_bucket.clone()
+            };
+
+            let prefix = if cli.s3_prefix.is_empty() {
+                std::env::var("S3_PREFIX").unwrap_or_default()
+            } else {
+                cli.s3_prefix.clone()
+            };
+
+            let s3 = S3Storage::new(endpoint, access_key, secret_key, bucket, prefix).await?;
+
+            Ok(Box::new(s3))
+        }
+        other => bail!("Unknown storage backend: {}. Use 'local' or 's3'", other),
+    }
 }
